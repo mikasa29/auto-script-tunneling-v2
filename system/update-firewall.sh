@@ -54,7 +54,8 @@ ufw allow 7300/tcp  # Custom
 ufw allow 109/tcp   # POP2
 ufw allow 110/tcp   # POP3
 ufw allow 143/tcp   # IMAP
-ufw allow 442/tcp   # Custom
+ufw allow 442/tcp   # Stunnel Dropbear
+ufw allow 777/tcp   # Stunnel OpenSSH
 
 # UDP Ports
 echo -e "${GREEN}[✓]${NC} Configuring UDP ports..."
@@ -86,7 +87,7 @@ echo "  • HTTPS        : 443, 8443"
 echo "  • Squid Proxy  : 3128"
 echo "  • Custom       : 2082, 2086, 2087, 2095, 2096, 7300"
 echo "  • Email        : 109, 110, 143"
-echo "  • Custom       : 442"
+echo "  • Stunnel      : 442, 777"
 echo ""
 echo -e "${GREEN}UDP Ports Opened:${NC}"
 echo "  • DNS          : 53"

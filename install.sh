@@ -278,6 +278,15 @@ ufw allow 2087/tcp  # Custom
 ufw allow 2095/tcp  # Custom
 ufw allow 2096/tcp  # Custom
 ufw allow 3128/tcp  # Squid Proxy
+ufw allow 7300/tcp  # BadVPN TCP
+ufw allow 7300/udp  # BadVPN UDP
+ufw allow 109/tcp   # Dropbear
+ufw allow 110/tcp   # POP3
+ufw allow 143/tcp   # IMAP
+ufw allow 442/tcp   # Stunnel Dropbear
+ufw allow 777/tcp   # Stunnel OpenSSH
+ufw allow 53/udp    # DNS
+ufw allow 1194/udp  # OpenVPN
 ufw allow 7300/tcp  # Custom
 ufw allow 109/tcp   # POP2
 ufw allow 143/tcp   # IMAP
