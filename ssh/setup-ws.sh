@@ -3,8 +3,20 @@
 # Install and Setup WebSocket-SSH
 
 # Install dependencies
-apt-get install -y python3-pip
-pip3 install websockify
+echo "Installing Websockify..."
+apt-get install -y websockify
+if ! command -v websockify &> /dev/null; then
+    apt-get install -y python3-pip
+    pip3 install websockify --break-system-packages 2>/dev/null || pip3 install websockify
+fi
+
+# Determine executable path
+WS_BIN=$(command -v websockify)
+if [ -z "$WS_BIN" ]; then
+    WS_EXEC="/usr/bin/python3 -m websockify"
+else
+    WS_EXEC="$WS_BIN"
+fi
 
 # Create service for WS-SSH (Port 700 -> Port 22)
 cat > /etc/systemd/system/ws-ssh.service << EOF
@@ -16,7 +28,7 @@ After=network.target
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/bin/python3 -m websockify 700 127.0.0.1:22
+ExecStart=$WS_EXEC 700 127.0.0.1:22
 Restart=on-failure
 RestartSec=3s
 
