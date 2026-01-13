@@ -51,6 +51,7 @@ ufw allow 2095/tcp  # Custom
 ufw allow 2096/tcp  # Custom
 ufw allow 3128/tcp  # Squid Proxy
 ufw allow 7300/tcp  # Custom
+ufw allow 89/tcp    # OVPN Config
 ufw allow 109/tcp   # POP2
 ufw allow 110/tcp   # POP3
 ufw allow 143/tcp   # IMAP
@@ -82,7 +83,7 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${GREEN}TCP Ports Opened:${NC}"
 echo "  • SSH          : 22"
-echo "  • HTTP         : 80, 8080"
+echo "  • HTTP         : 80, 8080, 89"
 echo "  • HTTPS        : 443, 8443"
 echo "  • Squid Proxy  : 3128"
 echo "  • Custom       : 2082, 2086, 2087, 2095, 2096, 7300"

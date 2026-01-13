@@ -61,6 +61,14 @@ server {
 }
 
 server {
+    listen 89;
+    listen [::]:89;
+    server_name $DOMAIN;
+    root /var/www/html;
+    index index.html index.htm;
+}
+
+server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
     server_name $DOMAIN;

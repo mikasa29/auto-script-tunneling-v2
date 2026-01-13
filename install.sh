@@ -277,6 +277,7 @@ ufw allow 2086/tcp  # Custom
 ufw allow 2087/tcp  # Custom
 ufw allow 2095/tcp  # Custom
 ufw allow 2096/tcp  # Custom
+ufw allow 89/tcp    # OVPN Config
 ufw allow 3128/tcp  # Squid Proxy
 ufw allow 7300/tcp  # BadVPN TCP
 ufw allow 7300/udp  # BadVPN UDP
