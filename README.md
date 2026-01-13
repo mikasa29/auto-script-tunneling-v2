@@ -192,6 +192,22 @@ dig vpn.yourdomain.com +short
 - Semua protocol selain VMESS/VLESS/TROJAN via port 443 akan gagal
 - SSH, Dropbear, Stunnel, Squid tidak akan bisa diakses
 
+## 🌐 Cloudflare API Token untuk Wildcard SSL
+
+Jika ingin menggunakan fitur Wildcard SSL (sertifikat otomatis untuk *.domain.com), Anda harus membuat API Token Cloudflare dengan izin DNS Edit. Ikuti langkah berikut:
+
+1. Login ke dashboard Cloudflare Anda.
+2. Klik ikon profil di kanan atas, pilih **My Profile**.
+3. Pilih menu **API Tokens** di kiri.
+4. Klik **Create Token**.
+5. Pilih template **Edit zone DNS** lalu klik **Use template**.
+6. Pada **Permissions** pastikan: `Zone` - `DNS` - `Edit`
+7. Pada **Zone Resources**: pilih **Include** > **Specific zone** > pilih domain Anda.
+8. Klik **Continue to summary** lalu **Create Token**.
+9. Salin token yang muncul (hanya muncul sekali).
+
+Saat install, masukkan email Cloudflare dan API Token ini jika ingin mengaktifkan Wildcard SSL.
+
 ## 🔄 Update Script
 
 ### Update via Command
