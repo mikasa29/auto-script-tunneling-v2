@@ -1241,6 +1241,9 @@ def process_create_account(message, protocol, username, days, limit_ip):
 • SSL/TLS: 442, 777
 • Squid: 3128, 8080
 • WebSocket: 80, 8080 (WS), 443 (WSS)
+
+📝 *OpenVPN Config:*
+http://{domain}:89/{username}.ovpn
             """
         else:
             # Read XRAY account JSON
@@ -1258,6 +1261,57 @@ def process_create_account(message, protocol, username, days, limit_ip):
             
             with open('/root/domain.txt', 'r') as f:
                 domain = f.read().strip()
+            
+            # Generate config links
+            uuid = account_data.get('uuid', '')
+            
+            # Generate vmess/vless/trojan links (TLS 443 and Non-TLS 80)
+            import base64
+            if protocol == 'vmess':
+                # TLS 443
+                vmess_config_tls = {
+                    "v": "2",
+                    "ps": f"{username}@{domain} TLS",
+                    "add": domain,
+                    "port": "443",
+                    "id": uuid,
+                    "aid": "0",
+                    "net": "ws",
+                    "type": "none",
+                    "host": domain,
+                    "path": "/vmess",
+                    "tls": "tls"
+                }
+                vmess_json_tls = json.dumps(vmess_config_tls)
+                vmess_link_tls = "vmess://" + base64.b64encode(vmess_json_tls.encode()).decode()
+                
+                # Non-TLS 80
+                vmess_config_ntls = {
+                    "v": "2",
+                    "ps": f"{username}@{domain} NTLS",
+                    "add": domain,
+                    "port": "80",
+                    "id": uuid,
+                    "aid": "0",
+                    "net": "ws",
+                    "type": "none",
+                    "host": domain,
+                    "path": "/vmess",
+                    "tls": ""
+                }
+                vmess_json_ntls = json.dumps(vmess_config_ntls)
+                vmess_link_ntls = "vmess://" + base64.b64encode(vmess_json_ntls.encode()).decode()
+                
+                config_link_tls = vmess_link_tls
+                config_link_ntls = vmess_link_ntls
+                
+            elif protocol == 'vless':
+                config_link_tls = f"vless://{uuid}@{domain}:443?type=ws&security=tls&path=/vless&host={domain}#{username}@{domain}-TLS"
+                config_link_ntls = f"vless://{uuid}@{domain}:80?type=ws&security=none&path=/vless&host={domain}#{username}@{domain}-NTLS"
+                
+            elif protocol == 'trojan':
+                config_link_tls = f"trojan://{uuid}@{domain}:443?type=ws&security=tls&path=/trojan&host={domain}#{username}@{domain}-TLS"
+                config_link_ntls = f"trojan://{uuid}@{domain}:80?type=ws&security=none&path=/trojan&host={domain}#{username}@{domain}-NTLS"
             
             account_text = f"""
 ✅ *{protocol.upper()} ACCOUNT CREATED*
@@ -1279,6 +1333,17 @@ def process_create_account(message, protocol, username, days, limit_ip):
 *Alternative Ports:*
 • TLS: 2082, 2086, 2087, 2095, 2096, 8443
 • Non-TLS: 8080
+
+📝 *Config Links:*
+
+🔐 *TLS (443):*
+`{config_link_tls}`
+
+🌐 *Non-TLS (80):*
+`{config_link_ntls}`
+
+🔗 *Web Config Download:*
+https://{domain}/{protocol}/{username}
             """
         
         # Delete processing message and send result
