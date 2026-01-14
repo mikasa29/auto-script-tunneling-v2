@@ -56,14 +56,14 @@ cat > /etc/nginx/sites-available/vpn << EOF
 server {
     listen 80;
     listen [::]:80;
-    server_name $DOMAIN;
+    server_name $DOMAIN *.$DOMAIN;
     return 301 https://\$server_name\$request_uri;
 }
 
 server {
     listen 89;
     listen [::]:89;
-    server_name $DOMAIN;
+    server_name $DOMAIN *.$DOMAIN;
     root /var/www/html;
     index index.html index.htm;
 }
@@ -71,7 +71,7 @@ server {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name $DOMAIN;
+    server_name $DOMAIN *.$DOMAIN;
 
     ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
@@ -259,7 +259,7 @@ cat > /var/www/html/index.html << EOF
         </a>
 
         <div class="footer">
-            <p>© 2024 AUTOSCRIPT TUNNELING. All rights reserved.</p>
+            <p>© 2026 Muzakie ID. All rights reserved.</p>
             <p>Powered by XRAY & NGINX</p>
         </div>
     </div>
