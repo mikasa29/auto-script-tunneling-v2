@@ -280,6 +280,10 @@ if [[ "$wildcard_ssl" =~ ^[Yy]$ ]]; then
             # Install with pinned versions to avoid deprecation warnings
             if apt-get install -y python3-certbot-dns-cloudflare 2>/dev/null; then
                 echo -e "${GREEN}Installed via apt${NC}"
+                # Downgrade cloudflare package to stable version to avoid warnings
+                echo -e "${YELLOW}Downgrading cloudflare package to stable version...${NC}"
+                pip3 install --upgrade cloudflare==2.19.4 --break-system-packages 2>/dev/null || \
+                pip3 install --upgrade cloudflare==2.19.4
             else
                 echo -e "${YELLOW}Installing via pip with stable versions...${NC}"
                 pip3 install certbot-dns-cloudflare cloudflare==2.19.4 --break-system-packages 2>/dev/null || \
@@ -324,6 +328,10 @@ if [[ "$wildcard_ssl" =~ ^[Yy]$ ]]; then
             # Install with pinned versions to avoid deprecation warnings
             if apt-get install -y python3-certbot-dns-cloudflare 2>/dev/null; then
                 echo -e "${GREEN}Installed via apt${NC}"
+                # Downgrade cloudflare package to stable version to avoid warnings
+                echo -e "${YELLOW}Downgrading cloudflare package to stable version...${NC}"
+                pip3 install --upgrade cloudflare==2.19.4 --break-system-packages 2>/dev/null || \
+                pip3 install --upgrade cloudflare==2.19.4
             else
                 echo -e "${YELLOW}Installing via pip with stable versions...${NC}"
                 pip3 install certbot-dns-cloudflare cloudflare==2.19.4 --break-system-packages 2>/dev/null || \
@@ -394,10 +402,14 @@ echo "0 0 * * * root $INSTALL_DIR/system/delete-expired.sh" > /etc/cron.d/delete
 echo "0 2 * * * root $INSTALL_DIR/system/auto-backup.sh" > /etc/cron.d/auto-backup
 
 # Configure UFW
+echo -e "${CYAN}[INFO]${NC} Configuring firewall (UFW)..."
 if ! command -v ufw &> /dev/null; then
     apt-get install -y ufw
 fi
+
+# Ensure UFW is enabled and will auto-start on boot
 ufw --force enable
+systemctl enable ufw
 
 # TCP Ports
 ufw allow 22/tcp    # SSH
