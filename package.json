@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "AUTOSCRIPT TUNNELING VPN",
+  "name": "AutoScript Tunneling V2",
   "description": "Complete VPN Server Auto Installer for Ubuntu 22+ / Debian 11+",
   "protocols": [
     "SSH",

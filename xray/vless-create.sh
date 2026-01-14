@@ -52,8 +52,40 @@ jq --arg uuid "$uuid" --arg email "$username@$domain" \
    '.inbounds |= map(if .protocol == "vless" then .settings.clients += [{"id": $uuid, "email": $email}] else . end)' \
    $CONFIG_FILE > /tmp/xray-config.tmp && mv /tmp/xray-config.tmp $CONFIG_FILE
 
+# Validate JSON config
+echo -e "${CYAN}Validating XRAY config...${NC}"
+if ! jq empty $CONFIG_FILE 2>/dev/null; then
+    echo -e "${RED}Invalid JSON config! Restoring backup...${NC}"
+    if [ -f "${CONFIG_FILE}.bak" ]; then
+        mv ${CONFIG_FILE}.bak $CONFIG_FILE
+    fi
+    rm -f /etc/tunneling/vless/${username}.json
+    exit 1
+fi
+
+# Backup current config
+cp $CONFIG_FILE ${CONFIG_FILE}.bak
+
 # Restart XRAY
+echo -e "${CYAN}Restarting XRAY service...${NC}"
 systemctl restart xray
+
+# Wait for service to be ready
+echo -e "${CYAN}Waiting for XRAY to start...${NC}"
+sleep 2
+
+# Check if XRAY is running
+if ! systemctl is-active --quiet xray; then
+    echo -e "${RED}Failed to start XRAY! Check logs with: journalctl -u xray -n 50${NC}"
+    if [ -f "${CONFIG_FILE}.bak" ]; then
+        mv ${CONFIG_FILE}.bak $CONFIG_FILE
+        systemctl restart xray
+    fi
+    rm -f /etc/tunneling/vless/${username}.json
+    exit 1
+fi
+
+echo -e "${GREEN}XRAY service running successfully!${NC}"
 
 # Generate vless:// link
 # Link TLS (Port 443) - Recommended
