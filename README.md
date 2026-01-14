@@ -120,28 +120,6 @@ Script ini akan:
 
 ---
 
-### Quick Install (One-Liner)
-
-```bash
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip wget && wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && sed -i -e 's/\r$//' setup.sh && screen -S setup ./setup.sh
-```
-
-### Quick Install (Step by Step)
-
-```bash
-apt update && apt upgrade -y
-wget -O setup.sh https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && ./setup.sh
-```
-
-### Manual Installation
-
-```bash
-git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git
-cd auto-script-tunneling
-chmod +x setup.sh
-./setup.sh
-```
-
 ## ☁️ DNS Configuration (PENTING!)
 
 ### Cloudflare DNS Settings
