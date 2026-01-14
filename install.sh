@@ -245,36 +245,102 @@ if systemctl is-active --quiet nginx; then
 fi
 
 # Ask for Cloudflare API for Wildcard (Optional)
-echo -e "${YELLOW}Do you want to enable Wildcard SSL for your domain?${NC}"
-echo -e "${YELLOW}This requires Cloudflare API Token.${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${YELLOW}     WILDCARD SSL CERTIFICATE SETUP${NC}"
+echo -e "${YELLOW}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+echo -e "${CYAN}Enable Wildcard SSL to support subdomain: *.${domain}${NC}"
+echo -e "${CYAN}This requires Cloudflare DNS management.${NC}"
+echo ""
 read -p "Enable Wildcard SSL? (y/n): " wildcard_ssl
 
-if [[ "$wildcard_ssl" == "y" ]]; then
-    read -p "Enter Cloudflare Email: " cf_email
-    read -p "Enter Cloudflare API Token: " cf_token
+if [[ "$wildcard_ssl" =~ ^[Yy]$ ]]; then
+    echo ""
+    echo -e "${CYAN}Select Cloudflare Authentication Method:${NC}"
+    echo -e "  ${YELLOW}1)${NC} API Token (Recommended - More Secure)"
+    echo -e "  ${YELLOW}2)${NC} Global API Key (Legacy)"
+    echo ""
+    read -p "Choose [1 or 2]: " cf_method
     
-    if [[ -n "$cf_email" && -n "$cf_token" ]]; then
-        echo -e "${CYAN}[INFO]${NC} Installing Cloudflare plugin..."
-        # Restore installation compatibility: apt -> pip break -> pip standard
-        apt-get install -y python3-certbot-dns-cloudflare || pip3 install certbot-dns-cloudflare --break-system-packages || pip3 install certbot-dns-cloudflare
+    if [[ "$cf_method" == "1" ]]; then
+        # API Token Method (Recommended)
+        echo ""
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${GREEN}API Token Setup Instructions:${NC}"
+        echo -e "${YELLOW}1.${NC} Go to https://dash.cloudflare.com/profile/api-tokens"
+        echo -e "${YELLOW}2.${NC} Click 'Create Token'"
+        echo -e "${YELLOW}3.${NC} Use 'Edit zone DNS' template"
+        echo -e "${YELLOW}4.${NC} Select your domain in Zone Resources"
+        echo -e "${YELLOW}5.${NC} Create and copy the token"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        read -p "Enter Cloudflare API Token: " cf_token
         
-        mkdir -p /root/.secrets
-        echo "dns_cloudflare_email = $cf_email" > /root/.secrets/cloudflare.ini
-        echo "dns_cloudflare_api_token = $cf_token" >> /root/.secrets/cloudflare.ini
-        chmod 600 /root/.secrets/cloudflare.ini
+        if [[ -n "$cf_token" ]]; then
+            echo -e "${CYAN}[INFO]${NC} Installing Cloudflare DNS plugin..."
+            apt-get install -y python3-certbot-dns-cloudflare || pip3 install certbot-dns-cloudflare --break-system-packages || pip3 install certbot-dns-cloudflare
+            
+            mkdir -p /root/.secrets
+            echo "# Cloudflare API Token" > /root/.secrets/cloudflare.ini
+            echo "dns_cloudflare_api_token = $cf_token" >> /root/.secrets/cloudflare.ini
+            chmod 600 /root/.secrets/cloudflare.ini
+            
+            echo -e "${CYAN}[INFO]${NC} Requesting Wildcard Certificate (*.${domain})..."
+            if certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+                -d "$domain" -d "*.$domain" --agree-tos --email "$email" --non-interactive --dns-cloudflare-propagation-seconds 30; then
+                echo -e "${GREEN}[SUCCESS]${NC} Wildcard SSL certificate installed successfully!"
+                echo "$cf_token" > /root/cloudflare-token.txt
+            else
+                echo -e "${RED}[ERROR]${NC} Wildcard certificate request failed! Falling back to standard certificate..."
+                rm -f /root/.secrets/cloudflare.ini
+                certbot certonly --standalone --preferred-challenges http --agree-tos --email "$email" -d "$domain" --non-interactive
+            fi
+        else
+            echo -e "${RED}[ERROR]${NC} API Token is empty. Falling back to standard certificate."
+            certbot certonly --standalone --preferred-challenges http --agree-tos --email "$email" -d "$domain" --non-interactive
+        fi
         
-        echo -e "${CYAN}[INFO]${NC} Requesting Wildcard Certificate..."
-        if ! certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
-            -d "$domain" -d "*.$domain" --agree-tos --email "$email" --non-interactive; then
-            echo -e "${RED}[ERROR]${NC} Wildcard certificate request failed! Falling back to standard HTTP challenge..."
-            rm -f /root/.secrets/cloudflare.ini
+    elif [[ "$cf_method" == "2" ]]; then
+        # Global API Key Method (Legacy)
+        echo ""
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo -e "${YELLOW}Global API Key Setup:${NC}"
+        echo -e "1. Go to https://dash.cloudflare.com/profile/api-tokens"
+        echo -e "2. Scroll to 'API Keys' section"
+        echo -e "3. Click 'View' on Global API Key"
+        echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+        echo ""
+        read -p "Enter Cloudflare Email: " cf_email
+        read -p "Enter Global API Key: " cf_api_key
+        
+        if [[ -n "$cf_email" && -n "$cf_api_key" ]]; then
+            echo -e "${CYAN}[INFO]${NC} Installing Cloudflare DNS plugin..."
+            apt-get install -y python3-certbot-dns-cloudflare || pip3 install certbot-dns-cloudflare --break-system-packages || pip3 install certbot-dns-cloudflare
+            
+            mkdir -p /root/.secrets
+            echo "# Cloudflare Global API Key" > /root/.secrets/cloudflare.ini
+            echo "dns_cloudflare_email = $cf_email" >> /root/.secrets/cloudflare.ini
+            echo "dns_cloudflare_api_key = $cf_api_key" >> /root/.secrets/cloudflare.ini
+            chmod 600 /root/.secrets/cloudflare.ini
+            
+            echo -e "${CYAN}[INFO]${NC} Requesting Wildcard Certificate (*.${domain})..."
+            if certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
+                -d "$domain" -d "*.$domain" --agree-tos --email "$email" --non-interactive --dns-cloudflare-propagation-seconds 30; then
+                echo -e "${GREEN}[SUCCESS]${NC} Wildcard SSL certificate installed successfully!"
+            else
+                echo -e "${RED}[ERROR]${NC} Wildcard certificate request failed! Falling back to standard certificate..."
+                rm -f /root/.secrets/cloudflare.ini
+                certbot certonly --standalone --preferred-challenges http --agree-tos --email "$email" -d "$domain" --non-interactive
+            fi
+        else
+            echo -e "${RED}[ERROR]${NC} Missing credentials. Falling back to standard certificate."
             certbot certonly --standalone --preferred-challenges http --agree-tos --email "$email" -d "$domain" --non-interactive
         fi
     else
-        echo -e "${RED}[ERROR]${NC} Missing Cloudflare credentials. Fallback to standard HTTP challenge."
+        echo -e "${YELLOW}[INFO]${NC} Invalid option. Using standard certificate..."
         certbot certonly --standalone --preferred-challenges http --agree-tos --email "$email" -d "$domain" --non-interactive
     fi
 else
+    echo -e "${CYAN}[INFO]${NC} Using standard SSL certificate (single domain)..."
     certbot certonly --standalone --preferred-challenges http --agree-tos --email "$email" -d "$domain" --non-interactive
 fi
 
