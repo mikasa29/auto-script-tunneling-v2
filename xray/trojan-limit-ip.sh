@@ -28,7 +28,7 @@ echo ""
 
 read -p "Username: " username
 
-json_file="/etc/tunneling/TROJAN/${username}.json"
+json_file="/etc/tunneling/trojan/${username}.json"
 if [ ! -f "$json_file" ]; then
     echo -e "${RED}User $username tidak ditemukan!${NC}"
     exit 1

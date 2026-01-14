@@ -15,6 +15,12 @@ echo ""
 
 read -p "Username: " username
 read -p "Duration (days): " days
+read -p "Limit IP (0=unlimited): " limit_ip
+read -p "Limit Quota GB (0=unlimited): " limit_quota
+
+# Set defaults if empty
+limit_ip=${limit_ip:-0}
+limit_quota=${limit_quota:-0}
 
 # Generate UUID
 uuid=$(cat /proc/sys/kernel/random/uuid)
@@ -33,8 +39,8 @@ cat > /etc/tunneling/vmess/${username}.json << EOF
     "uuid": "$uuid",
     "created": $(date +%s),
     "expired": $exp_timestamp,
-    "limit_ip": 0,
-    "limit_quota": 0
+    "limit_ip": $limit_ip,
+    "limit_quota": $limit_quota
 }
 EOF
 
