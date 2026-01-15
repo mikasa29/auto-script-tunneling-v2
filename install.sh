@@ -350,6 +350,21 @@ if [[ "$wildcard_ssl" =~ ^[Yy]$ ]]; then
             echo "dns_cloudflare_api_key = $cf_api_key" >> /root/.secrets/cloudflare.ini
             chmod 600 /root/.secrets/cloudflare.ini
             
+            # Auto-setup DNS records
+            echo -e "${B_CYA}[INFO]${RESET} Setting up DNS records via Cloudflare API..."
+            bash "$INSTALL_DIR/system/auto-setup-cloudflare-dns.sh" "$domain" "$cf_email" "$cf_api_key"
+            
+            if [ $? -eq 0 ]; then
+                echo -e "${B_GRE}[✓]${RESET} DNS records configured automatically"
+                echo -e "${YEL}Waiting 10s for DNS propagation...${RESET}"
+                sleep 10
+            else
+                echo -e "${YELLOW}[WARNING]${NC} DNS auto-setup failed. Please configure manually:"
+                echo "  A Record:     $domain → VPS IP"
+                echo "  CNAME Record: *.$domain → $domain"
+                read -p "Press Enter after DNS is configured..."
+            fi
+            
             echo -e "${CYAN}[INFO]${NC} Requesting Wildcard Certificate (*.${domain})..."
             if certbot certonly --dns-cloudflare --dns-cloudflare-credentials /root/.secrets/cloudflare.ini \
                 -d "$domain" -d "*.$domain" --agree-tos --email "$email" --non-interactive --dns-cloudflare-propagation-seconds 30; then
