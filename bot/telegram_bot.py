@@ -1417,6 +1417,77 @@ https://{domain}/{protocol}/{username}
             processing_msg.message_id
         )
 
+# Admin Add bug
+@bot.message_handler(commands=['addbug'])
+def add_bug_command(message):
+    if message.from_user.id != ADMIN_ID:
+        bot.send_message(message.chat.id, "⛔️ Access denied!")
+        return
+    
+    msg = bot.send_message(
+        message.chat.id,
+        "🐛 *ADD BUG/SUBDOMAIN*\n\nSend the bug/subdomain you want to add (e.g., zoom.us):",
+        parse_mode='Markdown'
+    )
+    bot.register_next_step_handler(msg, process_add_bug)
+
+def process_add_bug(message):
+    if message.from_user.id != ADMIN_ID:
+        return
+    
+    bug_host = message.text.strip()
+    
+    # Validation
+    if not bug_host or ' ' in bug_host:
+        bot.send_message(message.chat.id, "❌ Invalid bug host! No spaces allowed.")
+        return
+    
+    processing_msg = bot.send_message(message.chat.id, f"⏳ Adding bug {bug_host}...")
+    
+    try:
+        # Script Path
+        script_path = "/usr/local/sbin/tunneling/system/auto-add-bug.sh"
+        
+        if not os.path.exists(script_path):
+             bot.edit_message_text(
+                "❌ Internal error: auto-add-bug.sh not found!",
+                message.chat.id,
+                processing_msg.message_id
+            )
+             return
+
+        logger.info(f"Adding bug: {bug_host}")
+        
+        # Execute script
+        # auto-add-bug.sh typically takes the domain as an argument or input
+        # Assuming it takes argument based on standard practice
+        cmd = f"bash {script_path} {bug_host}"
+        exit_code = os.system(cmd + " >/dev/null 2>&1")
+        
+        logger.info(f"Add bug script finished with exit code: {exit_code}")
+        
+        if exit_code == 0:
+             bot.delete_message(message.chat.id, processing_msg.message_id)
+             bot.send_message(
+                message.chat.id,
+                f"✅ *BUG ADDED SUCCESSFULLY*\n\nHost: `{bug_host}`\nDomain: `bug.{bug_host}.yourdomain.com`",
+                parse_mode='Markdown'
+            )
+        else:
+             bot.edit_message_text(
+                "❌ Failed to add bug! Check logs.",
+                message.chat.id,
+                processing_msg.message_id
+            )
+            
+    except Exception as e:
+        logger.error(f"Error adding bug: {e}")
+        bot.edit_message_text(
+            f"❌ Error: {str(e)}",
+            message.chat.id,
+            processing_msg.message_id
+        )
+
 # Admin Statistics
 @bot.message_handler(func=lambda message: message.text == '📈 Statistics')
 def admin_statistics(message):
