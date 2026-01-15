@@ -177,8 +177,6 @@ FILES_SYSTEM=(
     "system/setup-rclone-manual.sh" "system/backup-online.sh" "system/restore-online.sh" 
     "system/auto-backup-online.sh" "system/auto-add-bug.sh" 
     "system/view-auto-ssl-analytics.sh" "system/fix-metrics-php.sh"
-    "system/install-openresty.sh" "system/generate-openresty-config.sh" 
-    "system/migrate-to-openresty.sh"
 )
 for file in "${FILES_SYSTEM[@]}"; do download_file "$file" "$INSTALL_DIR/$file"; done
 
@@ -393,60 +391,9 @@ ln -sf /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/certs/privkey.pem
 echo -e "${CYAN}[INFO]${NC} Configuring XRAY..."
 bash "$INSTALL_DIR/xray/setup-xray.sh"
 
-# Web Server Selection
-echo ""
-echo -e "${B_CYA}───────────────────────────────────────────────${RESET}"
-echo -e "${B_GRE}         Web Server Selection                ${RESET}"
-echo -e "${B_CYA}───────────────────────────────────────────────${RESET}"
-echo ""
-echo -e "${YEL}Choose web server:${RESET}"
-echo "  1) Nginx Standard (Recommended for most users)"
-echo "  2) OpenResty with Lua Auto SSL (Advanced - Auto SSL on-demand)"
-echo ""
-read -p "Select option [1]: " WEB_SERVER_CHOICE
-WEB_SERVER_CHOICE=${WEB_SERVER_CHOICE:-1}
-
-if [ "$WEB_SERVER_CHOICE" = "2" ]; then
-    echo ""
-    echo -e "${B_CYA}[INFO]${RESET} Installing OpenResty with Lua Auto SSL..."
-    echo -e "${YEL}Note:${RESET} This enables automatic SSL certificate generation for any subdomain"
-    echo ""
-    
-    # Install OpenResty
-    bash /usr/local/sbin/tunneling/install-openresty.sh
-    
-    # Generate OpenResty config
-    bash /usr/local/sbin/tunneling/generate-openresty.sh
-    
-    # Create systemd service
-    cat > /etc/systemd/system/openresty.service << 'EOSR'
-[Unit]
-Description=OpenResty - High Performance Web Server
-After=network.target
-
-[Service]
-Type=forking
-PIDFile=/run/openresty.pid
-ExecStartPre=/usr/local/openresty/bin/openresty -t
-ExecStart=/usr/local/openresty/bin/openresty
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s QUIT $MAINPID
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOSR
-    
-    systemctl daemon-reload
-    systemctl enable openresty
-    systemctl start openresty
-    
-    echo -e "${B_GRE}[✓]${RESET} OpenResty installed and Auto SSL enabled"
-else
-    # Setup Nginx Standard
-    echo -e "\n${B_CYA}[INFO]${RESET} Setting up Nginx...\n"
-    bash /usr/local/sbin/tunneling/setup-nginx.sh
-fi
+# Setup Nginx
+echo -e "\n${B_CYA}[INFO]${RESET} Setting up Nginx...\n"
+bash "$INSTALL_DIR/system/setup-nginx.sh"
 
 # Configure cron jobs
 echo "0 3 * * * root certbot renew --quiet --post-hook 'systemctl reload nginx'" > /etc/cron.d/ssl-renewal

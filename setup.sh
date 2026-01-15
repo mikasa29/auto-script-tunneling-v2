@@ -136,57 +136,7 @@ EOF
 
 # Download and install components
 echo -e "${CYAN}[INFO]${NC} Downloading components..."
-# Web Server Selection
-echo ""
-echo "===================================="
-echo " Web Server Selection"
-echo "===================================="
-echo ""
-echo "Choose web server:"
-echo "  1) Nginx Standard (Recommended)"
-echo "  2) OpenResty with Lua Auto SSL (Advanced - Auto on-demand)"
-echo ""
-read -p "Select [1]: " WEB_SERVER_CHOICE
-WEB_SERVER_CHOICE=${WEB_SERVER_CHOICE:-1}
-
-if [ "$WEB_SERVER_CHOICE" = "2" ]; then
-    echo ""
-    echo "[INFO] Installing OpenResty with Lua Auto SSL..."
-    
-    # Install OpenResty  
-    bash /usr/local/sbin/tunneling/install-openresty.sh
-    bash /usr/local/sbin/tunneling/generate-openresty-config.sh
-    
-    # Systemd service
-    cat > /etc/systemd/system/openresty.service << 'EOSR'
-[Unit]
-Description=OpenResty Web Server
-After=network.target
-
-[Service]
-Type=forking
-PIDFile=/run/openresty.pid  
-ExecStartPre=/usr/local/openresty/bin/openresty -t
-ExecStart=/usr/local/openresty/bin/openresty
-ExecReload=/bin/kill -s HUP $MAINPID
-ExecStop=/bin/kill -s QUIT $MAINPID
-Restart=on-failure
-
-[Install]
-WantedBy=multi-user.target
-EOSR
-    
-    systemctl daemon-reload
-    systemctl enable openresty
-    systemctl start openresty
-    
-    echo "[✓] OpenResty installed with Auto SSL"
-else
-    echo ""
-    echo "[INFO] Setting up Nginx..."
-    apt-get install -y nginx # Install Nginx here if not OpenResty
-    bash /usr/local/sbin/tunneling/setup-nginx.sh
-fi
+cd /usr/local/sbin/tunneling
 
 # Base URL for scripts
 BASE_URL="https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main"
