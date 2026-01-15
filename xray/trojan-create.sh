@@ -122,5 +122,5 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${YELLOW}Note: Import link above to V2RayNG/V2RayN/Clash${NC}"
 echo ""
-read -n 1 -s -r -p "Press any key to continue..." || true
+read -n 1 -s -r -p "Press any key to continue..."
 
