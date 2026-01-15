@@ -152,218 +152,280 @@ cat > /var/www/html/index.html << EOF
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VPN Server - $DOMAIN</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-dark: #1B211A;
+            --green-primary: #628141;
+            --green-light: #8BAE66;
+            --beige: #EBD5AB;
+            --glass: rgba(255, 255, 255, 0.03);
+            --border: rgba(139, 174, 102, 0.2);
+        }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Outfit', sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--beige);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(98, 129, 65, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(139, 174, 102, 0.1) 0%, transparent 20%);
         }
         .container {
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            max-width: 900px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 1000px;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 2rem;
+        }
+        .header {
             text-align: center;
+            margin-bottom: 1rem;
         }
         h1 {
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2.5em;
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--beige), var(--green-light));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
         }
-        .status {
-            display: inline-block;
-            background: #10b981;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 50px;
-            margin: 20px 0;
-            font-weight: bold;
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(98, 129, 65, 0.2);
+            color: var(--green-light);
+            border: 1px solid var(--green-primary);
+            padding: 6px 16px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            font-weight: 600;
         }
-        .info {
-            text-align: left;
-            margin: 30px 0;
-            padding: 20px;
-            background: #f3f4f6;
-            border-radius: 10px;
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #4ade80;
         }
-        .info h3 {
-            color: #374151;
-            margin-bottom: 15px;
+
+        .grid-dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
         }
-        .info ul {
+
+        /* Cards */
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            border-color: var(--green-primary);
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        .metric-item {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .metric-label {
+            font-size: 0.8rem;
+            color: var(--green-light);
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--beige);
+        }
+        .metric-unit {
+            font-size: 0.8rem;
+            color: rgba(235, 213, 171, 0.5);
+        }
+
+        /* Chart */
+        .chart-container {
+            height: 300px;
+            width: 100%;
+        }
+
+        /* Server Info */
+        .info-list {
             list-style: none;
-            padding: 0;
         }
-        .info li {
-            padding: 10px;
-            border-bottom: 1px solid #d1d5db;
+        .info-list li {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            color: rgba(235, 213, 171, 0.8);
         }
-        .info li:last-child {
+        .info-list li:last-child {
             border-bottom: none;
         }
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin: 30px 0;
+        .info-list span.value {
+            color: var(--green-light);
+            font-weight: 600;
         }
-        .metric-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        .metric-card h4 {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 10px;
-        }
-        .metric-card .value {
-            font-size: 2em;
-            font-weight: bold;
-        }
-        .metric-card .unit {
-            font-size: 0.8em;
-            opacity: 0.8;
-        }
-        .chart-container {
-            margin: 30px 0;
-            padding: 20px;
-            background: #f3f4f6;
-            border-radius: 10px;
-            height: 300px;
-        }
-        .footer {
-            margin-top: 30px;
-            color: #6b7280;
-            font-size: 0.9em;
+
+        /* CTA Button */
+        .cta-container {
+            text-align: center;
+            margin-top: 1rem;
         }
         .telegram-btn {
-            display: inline-block;
-            background: #0088cc;
-            color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--green-primary);
+            color: var(--bg-dark);
+            padding: 16px 40px;
+            border-radius: 12px;
+            font-weight: 700;
             text-decoration: none;
-            margin-top: 20px;
-            font-weight: bold;
-            transition: all 0.3s;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(98, 129, 65, 0.3);
         }
         .telegram-btn:hover {
-            background: #006699;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            background: var(--green-light);
+            transform: scale(1.02);
+            box-shadow: 0 6px 25px rgba(139, 174, 102, 0.4);
         }
-        .loading {
-            color: #6b7280;
-            font-style: italic;
+
+        .footer {
+            text-align: center;
+            margin-top: 3rem;
+            color: rgba(139, 174, 102, 0.5);
+            font-size: 0.8rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>🚀 VPN Server</h1>
-        <div class="status">🟢 Online</div>
         
-        <div class="info">
-            <h3>📡 Server Information</h3>
-            <ul>
-                <li><strong>Domain:</strong> $DOMAIN</li>
-                <li><strong>Status:</strong> Active</li>
-                <li><strong>Protocols:</strong> SSH, VMESS, VLESS, TROJAN</li>
-            </ul>
+        <!-- Header -->
+        <div class="header">
+            <div class="status-badge"><div class="status-dot"></div> SYSTEM OPERATIONAL</div>
+            <h1 style="margin-top: 15px;">VPN SERVER</h1>
+            <p style="color: var(--green-light);">$DOMAIN</p>
         </div>
 
-        <h3 style="color: #374151; margin-top: 30px;">📊 Real-time System Metrics</h3>
-        <div class="metrics">
-            <div class="metric-card">
-                <h4>🖥️ CPU Usage</h4>
-                <div class="value" id="cpu">--</div>
-                <div class="unit">%</div>
+        <div class="grid-dashboard">
+            
+            <!-- Metrics Column -->
+            <div class="card">
+                <h3 style="margin-bottom: 20px; color: var(--green-light);">SYSTEM METRICS</h3>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="metric-label">CPU LOAD</div>
+                        <div class="metric-value"><span id="cpu">0</span><span class="metric-unit">%</span></div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">RAM USAGE</div>
+                        <div class="metric-value"><span id="ram">0</span><span class="metric-unit">MB</span></div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">DISK I/O</div>
+                        <div class="metric-value"><span id="disk">0</span><span class="metric-unit">MB/s</span></div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="metric-label">NETWORK</div>
+                        <div class="metric-value"><span id="network">0</span><span class="metric-unit">Mbps</span></div>
+                    </div>
+                </div>
             </div>
-            <div class="metric-card">
-                <h4>💾 RAM Usage</h4>
-                <div class="value" id="ram">--</div>
-                <div class="unit">MB</div>
+
+            <!-- Server Info Column -->
+            <div class="card">
+                <h3 style="margin-bottom: 20px; color: var(--green-light);">SERVER DETAILS</h3>
+                <ul class="info-list">
+                    <li><span>Domain</span> <span class="value">$DOMAIN</span></li>
+                    <li><span>Location</span> <span class="value">Singapore (SG)</span></li>
+                    <li><span>ISP</span> <span class="value">DigitalOcean</span></li>
+                    <li><span>Protocols</span> <span class="value">VMESS, VLESS, TROJAN, SSH</span></li>
+                </ul>
+                <div class="cta-container" style="margin-top: 25px;">
+                    <a href="https://t.me/yourvpnbot" class="telegram-btn">
+                        <span>⚡ ORDER VIA BOT</span>
+                    </a>
+                </div>
             </div>
-            <div class="metric-card">
-                <h4>💽 Disk I/O</h4>
-                <div class="value" id="disk">--</div>
-                <div class="unit">MB/s</div>
-            </div>
-            <div class="metric-card">
-                <h4>🌐 Network</h4>
-                <div class="value" id="network">--</div>
-                <div class="unit">Mbit/s</div>
-            </div>
+
         </div>
 
-        <div class="chart-container">
-            <canvas id="metricsChart"></canvas>
+        <!-- Chart Section -->
+        <div class="card">
+            <h3 style="margin-bottom: 20px; color: var(--green-light);">TRAFFIC ANALYTICS</h3>
+            <div class="chart-container">
+                <canvas id="metricsChart"></canvas>
+            </div>
         </div>
-
-        <div class="info">
-            <h3>✨ Features</h3>
-            <ul>
-                <li>✅ High Speed Connection</li>
-                <li>✅ 99.9% Uptime</li>
-                <li>✅ Multiple Protocol</li>
-                <li>✅ 24/7 Support</li>
-                <li>✅ Auto Order via Bot</li>
-            </ul>
-        </div>
-
-        <a href="https://t.me/yourvpnbot" class="telegram-btn">
-            📱 Order via Telegram Bot
-        </a>
 
         <div class="footer">
-            <p>© 2026 Muzakie ID. All rights reserved.</p>
-            <p>Powered by XRAY & NGINX</p>
+            <p>&copy; 2026 MUZAKIE TUNNELING. SECURED BY XRAY.</p>
         </div>
     </div>
 
     <script>
-        // Initialize chart
+        // Colors & Config based on new palette
+        const colors = {
+            primary: '#628141',
+            light: '#8BAE66',
+            beige: '#EBD5AB',
+            grid: 'rgba(139, 174, 102, 0.1)'
+        };
+
         const ctx = document.getElementById('metricsChart');
         const maxDataPoints = 20;
+        
+        // Init Chart with Modern Config
+        Chart.defaults.color = colors.light;
+        Chart.defaults.borderColor = colors.grid;
+        
         const chartData = {
             labels: [],
             datasets: [
                 {
-                    label: 'CPU %',
+                    label: 'CPU',
                     data: [],
-                    borderColor: 'rgb(255, 99, 132)',
-                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
-                    tension: 0.4
+                    borderColor: colors.beige,
+                    backgroundColor: 'rgba(235, 213, 171, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
                 },
                 {
-                    label: 'RAM %',
+                    label: 'RAM',
                     data: [],
-                    borderColor: 'rgb(54, 162, 235)',
-                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
-                    tension: 0.4
-                },
-                {
-                    label: 'Disk I/O MB/s',
-                    data: [],
-                    borderColor: 'rgb(255, 206, 86)',
-                    backgroundColor: 'rgba(255, 206, 86, 0.1)',
-                    tension: 0.4
-                },
-                {
-                    label: 'Network Mbit/s',
-                    data: [],
-                    borderColor: 'rgb(75, 192, 192)',
-                    backgroundColor: 'rgba(75, 192, 192, 0.1)',
-                    tension: 0.4
+                    borderColor: colors.primary,
+                    backgroundColor: 'rgba(98, 129, 65, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 0
                 }
             ]
         };
@@ -377,39 +439,59 @@ cat > /var/www/html/index.html << EOF
                 plugins: {
                     legend: {
                         display: true,
-                        position: 'top'
+                        labels: {
+                            font: { family: 'Outfit' },
+                            usePointStyle: true,
+                            boxWidth: 8
+                        }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: '#1B211A',
+                        titleColor: '#EBD5AB',
+                        bodyColor: '#8BAE66',
+                        borderColor: '#628141',
+                        borderWidth: 1
                     }
                 },
                 scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { display: false }
+                    },
                     y: {
                         beginAtZero: true,
-                        max: 100
+                        max: 100,
+                        grid: { color: colors.grid }
                     }
+                },
+                interaction: {
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
             }
         });
 
-        // Fetch and update metrics
+        // Update Logic
         async function updateMetrics() {
             try {
                 const response = await fetch('/metrics.php');
                 const data = await response.json();
                 
-                // Update cards
+                // DOM Update
                 document.getElementById('cpu').textContent = data.cpu.toFixed(1);
                 document.getElementById('ram').textContent = data.ram_used.toFixed(0);
                 document.getElementById('disk').textContent = data.disk_io.toFixed(2);
-                document.getElementById('network').textContent = data.network.toFixed(2);
+                document.getElementById('network').textContent = data.network.toFixed(1);
                 
-                // Update chart
+                // Chart Update
                 const now = new Date().toLocaleTimeString();
                 chartData.labels.push(now);
                 chartData.datasets[0].data.push(data.cpu);
                 chartData.datasets[1].data.push(data.ram_percent);
-                chartData.datasets[2].data.push(data.disk_io);
-                chartData.datasets[3].data.push(data.network);
                 
-                // Keep only last 20 data points
                 if (chartData.labels.length > maxDataPoints) {
                     chartData.labels.shift();
                     chartData.datasets.forEach(dataset => dataset.data.shift());
@@ -417,11 +499,10 @@ cat > /var/www/html/index.html << EOF
                 
                 chart.update('none');
             } catch (error) {
-                console.error('Error fetching metrics:', error);
+                console.error('Metrics Error:', error);
             }
         }
 
-        // Update every 2 seconds
         updateMetrics();
         setInterval(updateMetrics, 2000);
     </script>
