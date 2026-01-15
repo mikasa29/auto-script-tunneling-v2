@@ -136,6 +136,20 @@ http {
         root /var/www/html;
         index index.html index.htm index.php;
         
+        # Log auto SSL requests for analytics
+        log_by_lua_block {
+            local ssl_name = ngx.var.ssl_server_name
+            if ssl_name and ssl_name ~= "" then
+                local log_file = io.open("/var/log/openresty/auto-ssl-requests.log", "a")
+                if log_file then
+                    local timestamp = os.date("%Y-%m-%d %H:%M:%S")
+                    local remote_ip = ngx.var.remote_addr
+                    log_file:write(timestamp .. " | " .. ssl_name .. " | " .. remote_ip .. "\\n")
+                    log_file:close()
+                end
+            end
+        }
+        
         # PHP Handler
         location ~ \.php\$ {
             include snippets/fastcgi-php.conf;
