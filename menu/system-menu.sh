@@ -27,11 +27,12 @@ echo -e "${GREEN} [13]${NC} Renew SSL Certificate"
 echo -e "${GREEN} [14]${NC} Change Auto Reboot Settings"
 echo -e "${GREEN} [15]${NC} Limit Speed Settings"
 echo -e "${GREEN} [16]${NC} View Auto SSL Analytics"
+echo -e "${GREEN} [17]${NC} Fix Metrics PHP (Landing Page)"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${RED}  [0]${NC} Back to Main Menu"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-read -p "Select Menu [0-16]: " menu
+read -p "Select Menu [0-17]: " menu
 
 case $menu in
     1)
@@ -81,6 +82,9 @@ case $menu in
         ;;
     16)
         /usr/local/sbin/tunneling/system/view-auto-ssl-analytics.sh
+        ;;
+    17)
+        /usr/local/sbin/tunneling/system/fix-metrics-php.sh
         ;;
     0)
         /usr/local/sbin/tunneling/menu/main-menu.sh
