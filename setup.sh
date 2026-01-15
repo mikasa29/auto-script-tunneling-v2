@@ -96,19 +96,19 @@ apt-get install -y \
     dropbear \
     stunnel4 \
     fail2ban \
-    vnstat \
     htop \
     speedtest-cli \
-    vnstat \
     net-tools \
     dnsutils \
     bc
 
 # Install BBR
 echo -e "${CYAN}[INFO]${NC} Installing BBR..."
-echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
-echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
-sysctl -p
+if ! grep -q "net.core.default_qdisc=fq" /etc/sysctl.conf; then
+    echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+    echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+    sysctl -p
+fi
 
 # Create directories
 echo -e "${CYAN}[INFO]${NC} Creating directories..."
@@ -233,8 +233,8 @@ systemctl start nginx
 
 # Link certificates
 mkdir -p /etc/xray/certs
-ln -s /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/certs/fullchain.pem
-ln -s /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/certs/privkey.pem
+ln -sf /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/certs/fullchain.pem
+ln -sf /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/certs/privkey.pem
 
 # Configure XRAY
 echo -e "${CYAN}[INFO]${NC} Configuring XRAY..."
@@ -263,29 +263,22 @@ fi
 
 # Configure UFW
 ufw --force enable
-ufw allow 22/tcp
-ufw allow 80/tcp
-ufw allow 443/tcp
-ufw allow 8080/tcp
-ufw allow 8443/tcp
-ufw allow 2082/tcp
-ufw allow 2086/tcp
-ufw allow 2087/tcp
-ufw allow 2095/tcp
-ufw allow 2096/tcp
-ufw allow 3128/tcp
-ufw allow 7300/tcp
-ufw allow 109/tcp
-ufw allow 143/tcp
-ufw allow 442/tcp
+ufw allow 22/tcp    # OpenSSH
+ufw allow 80/tcp    # HTTP (Nginx)
+ufw allow 109/tcp   # Dropbear SSH
+ufw allow 143/tcp   # Dropbear SSH
+ufw allow 442/tcp   # Stunnel (Dropbear SSL)
+ufw allow 443/tcp   # HTTPS (Nginx + XRAY)
+ufw allow 700/tcp   # WebSocket SSH
+ufw allow 777/tcp   # Stunnel (OpenSSH SSL)
+ufw allow 3128/tcp  # Squid Proxy
+ufw allow 7300/tcp  # BadVPN TCP
+ufw allow 7300/udp  # BadVPN UDP
+ufw allow 8080/tcp  # Squid Proxy
+ufw allow 8443/tcp  # HTTPS Alternate
 ufw reload
 
-# Create menu command
-cat > /usr/bin/menu << 'EOF'
-#!/bin/bash
-/usr/local/sbin/tunneling/main-menu.sh
-EOF
-chmod +x /usr/bin/menu
+# Sudah dibuat symlink menu di line 208, tidak perlu dobel
 
 # Final setup
 echo -e "${CYAN}[INFO]${NC} Finalizing installation..."

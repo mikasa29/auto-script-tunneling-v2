@@ -140,7 +140,20 @@ wget -q -O bot-price.sh "${BASE_URL}/bot/bot-price.sh"
 wget -q -O bot-notification.sh "${BASE_URL}/bot/bot-notification.sh"
 wget -q -O bot-test.sh "${BASE_URL}/bot/bot-test.sh"
 
-if [ $? -eq 0 ]; then
+# Validate all critical files were downloaded
+echo ""
+echo -e "${CYAN}[INFO]${NC} Validating downloaded files..."
+failed=0
+for file in main-menu.sh ssh-create.sh setup-xray.sh; do
+    if [ ! -s "$file" ]; then
+        echo -e "${RED}[ERROR] Failed to download: $file${NC}"
+        failed=1
+    fi
+done
+
+
+if [ $failed -eq 0 ]; then
+    echo -e "${GREEN}[✓]${NC} All files validated successfully"
     echo ""
     echo -e "${GREEN}[✓]${NC} Download completed"
     
@@ -189,8 +202,19 @@ if [ $? -eq 0 ]; then
     echo -e "  systemctl restart telegram-bot"
     echo ""
 else
-    echo -e "${RED}[✗]${NC} Download failed!"
-    echo -e "Please check your internet connection"
+    echo -e "${RED}[✗]${NC} Download validation failed!"
+    echo -e "${YELLOW}[INFO]${NC} Restoring from backup..."
+    if [ -f "$BACKUP_FILE" ]; then
+        tar -xzf "$BACKUP_FILE" -C /usr/local/sbin/ 2>/dev/null
+        if [ $? -eq 0 ]; then
+            echo -e "${GREEN}[✓]${NC} Backup restored successfully"
+        else
+            echo -e "${RED}[ERROR]${NC} Failed to restore backup"
+        fi
+    else
+        echo -e "${YELLOW}[WARNING]${NC} No backup file found to restore"
+    fi
+    echo -e "${RED}Please check your internet connection and try again${NC}"
     exit 1
 fi
 

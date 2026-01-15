@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "name": "AutoScript Tunneling V2",
+  "name": "autoscript-tunneling-v2",
   "description": "Complete VPN Server Auto Installer for Ubuntu 22+ / Debian 11+",
   "protocols": [
     "SSH",
@@ -66,24 +66,21 @@
     "ports": [
       22,
       80,
-      443,
       109,
       143,
       442,
+      443,
+      700,
+      777,
       3128,
-      8080,
-      2082,
-      2086,
-      2087,
-      2095,
-      2096,
       7300,
+      8080,
       8443
     ]
   },
   "installation": {
     "quick_install": "wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && ./setup.sh",
-    "manual_install": "git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git && cd autoscript-tunneling && chmod +x setup.sh && ./setup.sh"
+    "manual_install": "git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git && cd auto-script-tunneling-v2 && chmod +x setup.sh && ./setup.sh"
   },
   "author": "AUTOSCRIPT TUNNELING TEAM",
   "license": "Unlocked - Free to Edit",

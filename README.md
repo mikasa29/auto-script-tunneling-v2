@@ -43,7 +43,7 @@ Jika Anda ingin melihat source code sebelum install:
 ```bash
 apt update && apt install git -y
 git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2
-cd auto-script-tunneling
+cd auto-script-tunneling-v2
 chmod +x setup.sh
 ./setup.sh
 ```
@@ -137,7 +137,7 @@ wget -O setup.sh https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunnel
 
 ```bash
 git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git
-cd auto-script-tunneling
+cd auto-script-tunneling-v2
 chmod +x setup.sh
 ./setup.sh
 ```
@@ -399,6 +399,11 @@ Berikut adalah **daftar lengkap port** yang perlu dibuka di firewall/security gr
 | `3128` | Squid | HTTP Proxy (port 1) |
 | `8080` | Squid | HTTP Proxy (port 2) |
 
+#### **WebSocket (TCP)**
+| Port | Service | Deskripsi |
+|------|---------|-----------|
+| `700` | WebSocket-SSH | SSH over WebSocket Bridge |
+
 #### **Web Server / XRAY (TCP)**
 | Port | Service | Deskripsi |
 |------|---------|-----------|
@@ -417,22 +422,33 @@ Berikut adalah **daftar lengkap port** yang perlu dibuka di firewall/security gr
 Script akan otomatis mengkonfigurasi UFW dengan rules berikut:
 
 ```bash
-# SSH
-ufw allow 22/tcp
-ufw allow 109/tcp
-ufw allow 143/tcp
+# SSH Services
+ufw allow 22/tcp     # OpenSSH
+ufw allow 109/tcp    # Dropbear SSH
+ufw allow 143/tcp    # Dropbear SSH
 
 # SSL/TLS
-ufw allow 442/tcp
-ufw allow 777/tcp
+ufw allow 442/tcp    # Stunnel (Dropbear SSL)
+ufw allow 777/tcp    # Stunnel (OpenSSH SSL)
+
+# Web Server & XRAY
+ufw allow 80/tcp     # HTTP (Nginx)
+ufw allow 443/tcp    # HTTPS (Nginx + XRAY)
+ufw allow 8443/tcp   # HTTPS Alternate
+
+# WebSocket
+ufw allow 700/tcp    # WebSocket SSH
 
 # Proxy
-ufw allow 3128/tcp
-ufw allow 8080/tcp
+ufw allow 3128/tcp   # Squid Proxy
+ufw allow 8080/tcp   # Squid Proxy
 
-# Web Server
-ufw allow 80/tcp
-ufw allow 443/tcp
+# BadVPN
+ufw allow 7300/tcp   # BadVPN TCP
+ufw allow 7300/udp   # BadVPN UDP
+
+# DNS
+ufw allow 53/udp     # DNS
 
 # Enable UFW
 ufw --force enable
@@ -445,30 +461,20 @@ ufw --force enable
 | Type | Protocol | Port Range | Source | Deskripsi |
 |------|----------|------------|--------|-----------|
 | SSH | TCP | 22 | 0.0.0.0/0 | OpenSSH |
-| Custom TCP | TCP | 109-143 | 0.0.0.0/0 | Dropbear SSH (Port 109, 143) |
+| HTTP | TCP | 80 | 0.0.0.0/0 | Nginx + XRAY |
+| Custom TCP | TCP | 109 | 0.0.0.0/0 | Dropbear SSH |
+| Custom TCP | TCP | 143 | 0.0.0.0/0 | Dropbear SSH |
 | Custom TCP | TCP | 442 | 0.0.0.0/0 | Stunnel SSL (Dropbear) |
 | HTTPS | TCP | 443 | 0.0.0.0/0 | Nginx + XRAY (VMESS/VLESS/TROJAN) |
+| Custom TCP | TCP | 700 | 0.0.0.0/0 | WebSocket SSH |
 | Custom TCP | TCP | 777 | 0.0.0.0/0 | OpenSSH SSL (Stunnel) |
-| HTTP | TCP | 80 | 0.0.0.0/0 | Nginx + XRAY |
 | Custom TCP | TCP | 3128 | 0.0.0.0/0 | Squid Proxy |
+| Custom TCP | TCP | 7300 | 0.0.0.0/0 | BadVPN UDP Gateway |
+| Custom UDP | UDP | 7300 | 0.0.0.0/0 | BadVPN UDP Gateway |
 | Custom TCP | TCP | 8080 | 0.0.0.0/0 | Squid Proxy |
+| Custom TCP | TCP | 8443 | 0.0.0.0/0 | HTTPS Alternate |
 
-**Alternative: Simplified Range (Buka semua port sekaligus)**
 
-| Type | Protocol | Port Range | Source | Deskripsi |
-|------|----------|------------|--------|-----------|
-| SSH | TCP | 22 | 0.0.0.0/0 | OpenSSH |
-| HTTP | TCP | 80 | 0.0.0.0/0 | HTTP + XRAY |
-| Custom TCP | TCP | 109-143 | 0.0.0.0/0 | Dropbear SSH |
-| HTTPS | TCP | 443 | 0.0.0.0/0 | HTTPS + XRAY |
-| Custom TCP | TCP | 442 | 0.0.0.0/0 | SSL Stunnel |
-| Custom TCP | TCP | 777 | 0.0.0.0/0 | SSL Stunnel |
-| Custom TCP | TCP | 3128-8080 | 0.0.0.0/0 | Squid Proxy (Port 3128, 8080) |
-
-> **💡 Tips:** 
-> - Range `109-143` akan membuka port 109 dan 143 (Dropbear)
-> - Range `3128-8080` akan membuka port 3128 dan 8080 (Squid)
-> - Port lain di antara range tidak digunakan oleh service kita
 
 ### Arsitektur Port
 

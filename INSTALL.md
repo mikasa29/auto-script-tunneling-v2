@@ -43,7 +43,7 @@ wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/
 ```bash
 # Clone repository
 git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git
-cd autoscript-tunneling
+cd auto-script-tunneling-v2
 
 # Jalankan installer
 chmod +x setup.sh
