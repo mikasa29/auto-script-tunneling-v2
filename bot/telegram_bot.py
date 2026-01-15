@@ -5,7 +5,16 @@ import json
 import telebot
 import requests
 from datetime import datetime, timedelta
-from telebot import types
+import logging
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
 
 # Load config
 CONFIG_FILE = '/etc/tunneling/bot/config.json'
@@ -1232,15 +1241,31 @@ def process_create_account(message, protocol, username, days, limit_ip):
         # Generate password for SSH
         password = ''.join(random.choices(string.ascii_letters + string.digits, k=12))
         
-        # Create account based on protocol
+        # Define Script Paths (Consistent with approve_order)
+        SCRIPT_PATHS = {
+            'vmess': {'create': '/usr/local/sbin/tunneling/xray/vmess-create.sh'},
+            'vless': {'create': '/usr/local/sbin/tunneling/xray/vless-create.sh'},
+            'trojan': {'create': '/usr/local/sbin/tunneling/xray/trojan-create.sh'},
+            'ssh': {'create': '/usr/local/sbin/tunneling/ssh/ssh-create.sh'}
+        }
+
+        create_script = SCRIPT_PATHS.get(protocol, {}).get('create')
+        if not create_script:
+            logger.error(f"Script not found for protocol: {protocol}")
+            bot.send_message(message.chat.id, "❌ Internal error: Script not found")
+            return
+
+        logger.info(f"Creating account: {protocol} user={username} days={days}")
+        
+        # Execute script
         if protocol == 'ssh':
-            # Create SSH account
-            cmd = f"bash /usr/local/sbin/tunneling/ssh/ssh-create.sh {username} {password} {days} {limit_ip} {limit_quota}"
-            os.system(cmd + " >/dev/null 2>&1")
+             cmd = f"bash {create_script} {username} {password} {days} {limit_ip} {limit_quota}"
+             exit_code = os.system(cmd + " >/dev/null 2>&1")
         else:
-            # Create XRAY account (vmess/vless/trojan)
-            cmd = f"echo -e '{username}\\n{days}\\n{limit_ip}\\n{limit_quota}' | bash /usr/local/sbin/tunneling/xray/{protocol}-create.sh"
-            os.system(cmd + " >/dev/null 2>&1")
+             cmd = f"echo -e '{username}\\n{days}\\n{limit_ip}\\n{limit_quota}' | bash {create_script}"
+             exit_code = os.system(cmd + " >/dev/null 2>&1")
+        
+        logger.info(f"Script execution finished with exit code: {exit_code}")
         
         # Wait for account creation
         import time
