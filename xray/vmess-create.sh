@@ -160,4 +160,4 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${YELLOW}Note: XRAY config auto-reload required${NC}"
 echo ""
-read -n 1 -s -r -p "Press any key to continue..."
+read -n 1 -s -r -p "Press any key to continue..." || true

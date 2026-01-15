@@ -117,5 +117,5 @@ echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${YELLOW}Note: If one link doesn't work, try the other one.${NC}"
 echo ""
-read -n 1 -s -r -p "Press any key to continue..."
+read -n 1 -s -r -p "Press any key to continue..." || true
 
