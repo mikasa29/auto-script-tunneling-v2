@@ -377,23 +377,23 @@ if [[ ! -f "/etc/letsencrypt/live/$domain/fullchain.pem" ]]; then
         -subj "/C=ID/ST=Java/L=Jakarta/O=Tunneling/CN=$domain"
 fi
 
-# Configure NGINX
-if command -v nginx &> /dev/null; then
-    echo -e "${CYAN}[INFO]${NC} Configuring NGINX..."
-    bash "$INSTALL_DIR/system/setup-nginx.sh"
-    systemctl restart nginx
-else
-    echo -e "${YELLOW}[WARNING]${NC} NGINX not installed, skipping configuration..."
-fi
-
-# Link certificates
+# Link certificates to XRAY
 mkdir -p /etc/xray/certs
 ln -sf /etc/letsencrypt/live/$domain/fullchain.pem /etc/xray/certs/fullchain.pem
 ln -sf /etc/letsencrypt/live/$domain/privkey.pem /etc/xray/certs/privkey.pem
 
-# Configure XRAY
+# Configure XRAY first (so it's ready when Nginx starts)
 echo -e "${CYAN}[INFO]${NC} Configuring XRAY..."
 bash "$INSTALL_DIR/xray/setup-xray.sh"
+
+# Configure NGINX (after XRAY is configured)
+if command -v nginx &> /dev/null; then
+    echo -e "${CYAN}[INFO]${NC} Configuring NGINX..."
+    bash "$INSTALL_DIR/system/setup-nginx.sh"
+    # Note: Nginx will be restarted in final setup (line ~437)
+else
+    echo -e "${YELLOW}[WARNING]${NC} NGINX not installed, skipping configuration..."
+fi
 
 # Configure cron jobs
 echo "0 3 * * * root certbot renew --quiet --post-hook 'systemctl reload nginx'" > /etc/cron.d/ssl-renewal

@@ -221,6 +221,12 @@ bash "$INSTALL_DIR/ssh/setup-squid.sh"
 echo -e "${CYAN}[INFO]${NC} Setting up TUN/TAP device for SSH tunneling..."
 bash "$INSTALL_DIR/ssh/setup-tuntap.sh"
 
+echo -e "${CYAN}[INFO]${NC} Setting up WebSocket-SSH..."
+bash "$INSTALL_DIR/ssh/setup-ws.sh"
+
+echo -e "${CYAN}[INFO]${NC} Setting up BadVPN UDP Gateway..."
+bash "$INSTALL_DIR/ssh/setup-badvpn.sh"
+
 # Install XRAY
 echo -e "${CYAN}[INFO]${NC} Installing XRAY..."
 bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
