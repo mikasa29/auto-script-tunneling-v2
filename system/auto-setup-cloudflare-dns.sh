@@ -40,17 +40,32 @@ fi
 
 echo -e "${GREEN}✓${NC} VPS IP: $VPS_IP"
 
-# Get root domain (handle multi-level TLDs like .my.id, .co.id)
+# Smart root domain extraction (universal approach)
 if [[ $DOMAIN =~ \. ]]; then
-    # Check if it's a multi-level TLD (.my.id, .co.id, etc)
-    if [[ $DOMAIN =~ \.(my|co|ac|or|sch|net|web|go)\.id$ ]] || \
-       [[ $DOMAIN =~ \.(co|ac|or|net)\.uk$ ]] || \
-       [[ $DOMAIN =~ \.(com|net|org|edu)$ ]]; then
-        # Extract last 3 parts for multi-level TLD
+    # Count domain parts
+    PART_COUNT=$(echo "$DOMAIN" | awk -F. '{print NF}')
+    
+    if [ "$PART_COUNT" -ge 4 ]; then
+        # 4+ parts: likely subdomain with multi-level TLD
+        # Example: v6.muzakieid.my.id (4 parts) → muzakieid.my.id (last 3)
+        #          sub.domain.co.uk (4 parts) → domain.co.uk (last 3)
         ROOT_DOMAIN=$(echo $DOMAIN | awk -F. '{print $(NF-2)"."$(NF-1)"."$NF}')
+    elif [ "$PART_COUNT" -eq 3 ]; then
+        # 3 parts: could be root with multi-level TLD OR subdomain with standard TLD
+        # Check last part length - if 2 chars, likely multi-level TLD (co.uk, my.id)
+        LAST_PART=$(echo $DOMAIN | awk -F. '{print $NF}')
+        if [ "${#LAST_PART}" -eq 2 ]; then
+            # Likely multi-level TLD: take all 3 parts
+            # Example: muzakieid.my.id → muzakieid.my.id (all)
+            ROOT_DOMAIN=$DOMAIN
+        else
+            # Standard TLD: take last 2 parts
+            # Example: sub.domain.com → domain.com (last 2)
+            ROOT_DOMAIN=$(echo $DOMAIN | awk -F. '{print $(NF-1)"."$NF}')
+        fi
     else
-        # Extract last 2 parts for regular TLD
-        ROOT_DOMAIN=$(echo $DOMAIN | awk -F. '{print $(NF-1)"."$NF}')
+        # 2 parts or less: already root domain
+        ROOT_DOMAIN=$DOMAIN
     fi
 else
     ROOT_DOMAIN=$DOMAIN
