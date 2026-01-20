@@ -151,315 +151,462 @@ cat > /var/www/html/index.html << EOF
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VPN Dashboard - $DOMAIN</title>
+    
+    <!-- Libraries -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    
     <style>
         :root {
-            /* Palette */
-            --bg-body: #F6F0D7;     /* Cream BG */
-            --primary: #89986D;     /* Dark Sage - Primary Action/Text */
-            --secondary: #9CAB84;   /* Sage - Secondary Elements */
-            --accent: #C5D89D;      /* Light Sage - Accents/Soft BG */
+            /* Modern Light Theme Palette */
+            --primary: #4f46e5;       /* Indigo */
+            --primary-soft: #e0e7ff;
+            --secondary: #64748b;     /* Slate */
+            --success: #10b981;       /* Emerald */
+            --bg-body: #f8fafc;       /* Very Light Gray */
             --card-bg: #ffffff;
-            --text-main: #2c3e2e;   /* Darker text */
-            --text-muted: #89986D;
-            --border: #e1e6d8;
+            --text-main: #0f172a;     /* Slate 900 */
+            --text-muted: #64748b;    /* Slate 500 */
+            --border: #e2e8f0;
+            
+            /* Effects */
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --radius: 1rem;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
+
         body {
             font-family: 'Outfit', sans-serif;
             background-color: var(--bg-body);
             color: var(--text-main);
             min-height: 100vh;
-            padding: 1rem;
-            /* Subtle texture */
-            background-image: radial-gradient(#9CAB84 1px, transparent 1px);
-            background-size: 20px 20px;
+            /* Modern abstract background */
+            background-image: 
+                radial-gradient(at 0% 0%, hsla(253,16%,7%,1) 0, transparent 50%), 
+                radial-gradient(at 50% 0%, hsla(225,39%,30%,1) 0, transparent 50%), 
+                radial-gradient(at 100% 0%, hsla(339,49%,30%,1) 0, transparent 50%);
+            background-image: 
+                radial-gradient(at 40% 20%, hsla(228,100%,74%,0.1) 0px, transparent 50%),
+                radial-gradient(at 80% 0%, hsla(189,100%,56%,0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 50%, hsla(340,100%,76%,0.05) 0px, transparent 50%);
+            background-attachment: fixed;
+            padding: 2rem;
         }
 
-        .app-container {
-            max-width: 1100px;
+        .container {
+            max-width: 1200px;
             margin: 0 auto;
             width: 100%;
         }
 
-        /* Header */
+        /* --- Animations --- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-enter {
+            animation: fadeUp 0.6s ease-out forwards;
+            opacity: 0; /* Start hidden */
+        }
+        
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+
+        /* --- Header --- */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 2rem;
-            background: var(--card-bg);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             padding: 1rem 1.5rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(137, 152, 109, 0.05);
-            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: var(--shadow-sm);
         }
 
         .brand {
             display: flex;
             align-items: center;
-            gap: 10px;
-            font-size: 1.25rem;
+            gap: 12px;
+            font-size: 1.5rem;
             font-weight: 700;
-            color: var(--primary);
+            color: var(--text-main);
+            letter-spacing: -0.5px;
         }
-        .brand i { font-size: 1.5rem; }
+        .brand-icon {
+            color: var(--primary);
+            background: var(--primary-soft);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 1.25rem;
+        }
 
-        .status-pill {
-            background: #e6f4ea;
-            color: #1e7e34;
-            padding: 6px 12px;
+        .status-badge {
+            background: #ecfdf5;
+            color: var(--success);
+            padding: 8px 16px;
             border-radius: 100px;
-            font-size: 0.8rem;
+            font-size: 0.875rem;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 8px;
+            border: 1px solid #d1fae5;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1);
         }
-        .status-dot { width: 8px; height: 8px; background: #28a745; border-radius: 50%; }
+        .status-dot { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); animation: pulse 2s infinite; }
 
-        /* Dashboard Grid */
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+        /* --- Stats Grid --- */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
         }
 
         .stat-card {
             background: var(--card-bg);
-            padding: 1.25rem;
-            border-radius: 16px;
+            padding: 1.5rem;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            box-shadow: 0 2px 10px rgba(137, 152, 109, 0.03);
+            gap: 10px;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-soft);
         }
 
-        .stat-icon {
-            color: var(--secondary);
-            font-size: 1.5rem;
-            margin-bottom: 4px;
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--primary);
+            opacity: 0;
+            transition: var(--transition);
         }
-        .stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
-        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--text-main); line-height: 1; }
-        .stat-unit { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+        .stat-card:hover::before { opacity: 1; }
 
-        /* Main Content Layout */
-        .content-wrapper {
+        .stat-header { display: flex; align-items: center; justify-content: space-between; color: var(--text-muted); }
+        .stat-icon { font-size: 1.25rem; background: var(--bg-body); padding: 8px; border-radius: 10px; }
+        .stat-title { font-size: 0.875rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .stat-body { display: flex; align-items: baseline; gap: 4px; }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--text-main); line-height: 1; }
+        .stat-unit { font-size: 0.875rem; font-weight: 500; color: var(--text-muted); }
+
+        /* --- Main Content --- */
+        .dashboard-layout {
             display: grid;
             grid-template-columns: 2fr 1fr;
-            gap: 1.5rem;
+            gap: 2rem;
         }
 
-        .card-box {
+        .panel {
             background: var(--card-bg);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: var(--radius);
             border: 1px solid var(--border);
-            box-shadow: 0 2px 15px rgba(137, 152, 109, 0.03);
+            box-shadow: var(--shadow-sm);
+            padding: 2rem;
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
-            min-width: 0; /* Important for grid responsiveness */
+            height: 100%;
         }
 
-        .card-header {
+        .panel-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
+            margin-bottom: 1.5rem;
         }
-        .card-title { font-size: 1.1rem; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
+        .panel-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .panel-title i { color: var(--primary); }
 
-        /* List Styling */
-        .info-list { display: flex; flex-direction: column; gap: 0; }
-        .info-item {
+        /* Chart */
+        .chart-wrapper {
+            position: relative;
+            height: 350px;
+            width: 100%;
+        }
+
+        /* Info List */
+        .info-list { display: flex; flex-direction: column; gap: 1rem; flex: 1; }
+        .info-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.95rem;
+            padding: 0.75rem 0;
+            border-bottom: 1px dashed var(--border);
         }
-        .info-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .info-item:first-child { padding-top: 0; }
-        
-        .info-label { color: var(--text-muted); display: flex; align-items: center; gap: 8px; }
-        .info-value { font-weight: 600; color: var(--text-main); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: var(--text-muted); display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+        .info-value { font-weight: 600; color: var(--text-main); font-size: 1rem; }
 
-        /* Action Button */
-        .btn-order {
-            background: var(--primary);
+        /* Button */
+        .btn-action {
+            margin-top: 1.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
             color: white;
             text-decoration: none;
             padding: 1rem;
-            border-radius: 14px;
-            text-align: center;
+            border-radius: 12px;
             font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            transition: transform 0.2s, background 0.2s;
-            margin-top: auto; /* Push to bottom */
+            transition: var(--transition);
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
         }
-        .btn-order:active { transform: scale(0.98); background: var(--secondary); }
-
-        /* Chart */
-        .chart-container {
-            position: relative;
-            height: 300px;
-            width: 100%;
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(79, 70, 229, 0.3);
         }
+        .btn-action:active { transform: scale(0.98); }
 
         /* Footer */
         .footer {
             text-align: center;
-            margin-top: 2rem;
+            margin-top: 3rem;
             color: var(--text-muted);
-            font-size: 0.8rem;
-            padding-bottom: 1rem;
+            font-size: 0.875rem;
         }
 
-        /* Mobile Adjustments */
-        @media (max-width: 900px) {
-            .content-wrapper { grid-template-columns: 1fr; }
+        /* --- Responsive Design --- */
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .dashboard-layout { grid-template-columns: 1fr; }
         }
 
-        @media (max-width: 600px) {
-            body { padding: 0.75rem; }
-            .header { padding: 0.75rem 1rem; margin-bottom: 1rem; }
-            .brand { font-size: 1.1rem; }
-            .stats-grid { grid-template-columns: 1fr; gap: 0.75rem; }
-            .stat-card { padding: 1rem; }
-            .stat-value { font-size: 1.25rem; }
-            .card-box { padding: 1.25rem; }
-            .chart-container { height: 250px; }
+        @media (max-width: 640px) {
+            body { padding: 1rem; padding-bottom: 3rem; }
             
-            /* Remove highlighting on mobile tap */
-            a, button, div { -webkit-tap-highlight-color: rgba(0,0,0,0); }
+            /* Enhanced Header for Mobile */
+            .header { 
+                flex-direction: column; 
+                gap: 1rem; 
+                text-align: center;
+                align-items: stretch;
+                padding: 1.25rem;
+            }
+            .brand { justify-content: center; width: 100%; }
+            .status-badge { width: 100%; justify-content: center; }
+            
+            .stats-grid { grid-template-columns: 1fr; gap: 0.75rem; }
+
+            /* Mobile Horizontal Stat Card Layout */
+            .stat-card { 
+                flex-direction: row; 
+                align-items: center; 
+                justify-content: space-between;
+                padding: 1rem 1.25rem;
+                min-height: auto;
+            }
+            
+            /* Keep accent border */
+            .stat-card::before { width: 4px; }
+            
+            /* Reorganize Header: Icon left, Title right */
+            .stat-header { 
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 0;
+                justify-content: flex-start;
+            }
+            
+            /* Move icon before title using order */
+            .stat-icon { 
+                order: -1; 
+                font-size: 1.2rem;
+                padding: 6px;
+                background: rgba(79, 70, 229, 0.1); 
+                color: var(--primary);
+                border-radius: 8px;
+            }
+            
+            .stat-title { 
+                font-size: 0.95rem; 
+                font-weight: 600;
+                color: var(--text-main);
+                text-transform: none; /* easier to read */
+            }
+
+            /* Adjust Values to be right-aligned */
+            .stat-body { 
+                flex-direction: row; 
+                align-items: baseline; 
+            }
+            .stat-value { font-size: 1.25rem; }
+            .stat-unit { font-size: 0.85rem; }
+
+            .panel { padding: 1.25rem; }
+            .chart-wrapper { height: 230px; }
+            .footer { margin-top: 2rem; }
         }
     </style>
 </head>
 <body>
 
-    <div class="app-container">
+    <div class="container">
         
         <!-- Header -->
-        <header class="header">
+        <header class="header animate-enter">
             <div class="brand">
-                <i class="ri-shield-flash-fill"></i>
+                <div class="brand-icon"><i class="ri-shield-check-line"></i></div>
                 <span>VPN Panel</span>
             </div>
-            <div class="status-pill">
+            <div class="status-badge">
                 <div class="status-dot"></div>
-                <span>Online</span>
+                <span>System Operational</span>
             </div>
         </header>
 
-        <!-- Stats Grid -->
+        <!-- Stats -->
         <div class="stats-grid">
-            <div class="stat-card">
-                <i class="ri-cpu-line stat-icon"></i>
-                <div>
-                    <div class="stat-label">CPU Load</div>
-                    <div><span class="stat-value" id="cpu">--</span><span class="stat-unit">%</span></div>
+            <!-- CPU -->
+            <div class="stat-card animate-enter delay-1">
+                <div class="stat-header">
+                    <span class="stat-title">CPU Load</span>
+                    <i class="ri-cpu-line stat-icon"></i>
+                </div>
+                <!-- Desktop Layout -->
+                <div class="stat-body">
+                    <span class="stat-value" id="cpu">--</span>
+                    <span class="stat-unit">%</span>
+                </div>
+                <!-- Mobile only helper (hidden by default, shown via CSS if needed, or simplified) -->
+            </div>
+
+            <!-- RAM -->
+            <div class="stat-card animate-enter delay-1">
+                <div class="stat-header">
+                    <span class="stat-title">RAM Usage</span>
+                    <i class="ri-database-2-line stat-icon"></i>
+                </div>
+                <div class="stat-body">
+                    <span class="stat-value" id="ram">--</span>
+                    <span class="stat-unit">MB</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="ri-stack-line stat-icon"></i>
-                <div>
-                    <div class="stat-label">RAM</div>
-                    <div><span class="stat-value" id="ram">--</span><span class="stat-unit">MB</span></div>
+
+            <!-- Network -->
+            <div class="stat-card animate-enter delay-2">
+                <div class="stat-header">
+                    <span class="stat-title">Bandwidth</span>
+                    <i class="ri-speed-line stat-icon"></i>
+                </div>
+                <div class="stat-body">
+                    <span class="stat-value" id="network">--</span>
+                    <span class="stat-unit">Mbps</span>
                 </div>
             </div>
-            <div class="stat-card">
-                <i class="ri-speed-line stat-icon"></i>
-                <div>
-                    <div class="stat-label">Network</div>
-                    <div><span class="stat-value" id="network">--</span><span class="stat-unit">Mbps</span></div>
+
+            <!-- Disk -->
+            <div class="stat-card animate-enter delay-2">
+                <div class="stat-header">
+                    <span class="stat-title">Disk I/O</span>
+                    <i class="ri-hard-drive-2-line stat-icon"></i>
                 </div>
-            </div>
-            <div class="stat-card">
-                <i class="ri-database-2-line stat-icon"></i>
-                <div>
-                    <div class="stat-label">Disk</div>
-                    <div><span class="stat-value" id="disk">--</span><span class="stat-unit">MB/s</span></div>
+                <div class="stat-body">
+                    <span class="stat-value" id="disk">--</span>
+                    <span class="stat-unit">MB/s</span>
                 </div>
             </div>
         </div>
 
-        <!-- Content -->
-        <div class="content-wrapper">
+        <!-- Main Dashboard -->
+        <div class="dashboard-layout">
             
-            <!-- Chart Section -->
-            <div class="card-box">
-                <div class="card-header">
-                    <div class="card-title"><i class="ri-bar-chart-box-line"></i> Traffic Monitor</div>
+            <!-- Chart Area -->
+            <div class="panel animate-enter delay-3">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="ri-bar-chart-grouped-line"></i> Real-time Traffic</div>
+                    <button onclick="updateMetrics()" style="background:none; border:none; cursor:pointer; color:var(--text-muted)">
+                        <i class="ri-refresh-line"></i>
+                    </button>
                 </div>
-                <div class="chart-container">
+                <div class="chart-wrapper">
                     <canvas id="metricsChart"></canvas>
                 </div>
             </div>
 
-            <!-- Server Details -->
-            <div class="card-box">
-                <div class="card-header">
-                    <div class="card-title"><i class="ri-server-line"></i> Server Info</div>
-                </div>
-                <div class="info-list">
-                    <div class="info-item">
-                        <span class="info-label"><i class="ri-global-line"></i> Host</span>
-                        <span class="info-value">$DOMAIN</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label"><i class="ri-map-pin-line"></i> Location</span>
-                        <span class="info-value">SG / IDN</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label"><i class="ri-base-station-line"></i> Protocol</span>
-                        <span class="info-value">Multi-Port</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="info-label"><i class="ri-time-line"></i> Uptime</span>
-                        <span class="info-value">99.9%</span>
-                    </div>
+            <!-- Server Info -->
+            <div class="panel animate-enter delay-3">
+                <div class="panel-header">
+                    <div class="panel-title"><i class="ri-server-line"></i> Server Details</div>
                 </div>
                 
-                <a href="https://t.me/yourvpnbot" class="btn-order">
+                <div class="info-list">
+                    <div class="info-row">
+                        <span class="info-label"><i class="ri-global-line"></i> Hostname</span>
+                        <span class="info-value">$DOMAIN</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="ri-map-pin-line"></i> Location</span>
+                        <span class="info-value">Singapore / IDN</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="ri-shield-keyhole-line"></i> Protocol</span>
+                        <span class="info-value">TLS / XTLS</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="info-label"><i class="ri-time-line"></i> Uptime</span>
+                        <span class="info-value">99.98%</span>
+                    </div>
+                </div>
+
+                <a href="https://t.me/MuzakieID" class="btn-action">
                     <i class="ri-telegram-fill"></i> OPEN BOT MENU
                 </a>
             </div>
 
         </div>
 
-        <div class="footer">
-            &copy; 2026 Secured by XRAY Core. Optimized for Mobile.
+        <div class="footer animate-enter delay-3">
+            <p>&copy; 2026 Secured by XRAY Core. Modern Dashboard UI.</p>
         </div>
 
     </div>
 
+    <!-- JS Logic -->
     <script>
-        // Palette for JS
-        const theme = {
-            primary: '#89986D',     // Dark Sage
-            secondary: '#9CAB84',   // Sage
-            accent: '#C5D89D',      // Light Green (distinct)
-            bg: '#F6F0D7',
-            white: '#ffffff',
-            grid: '#e1e6d8'
-        };
+        const ctx = document.getElementById('metricsChart').getContext('2d');
+        
+        // Gradient for chart
+        const gradientCpu = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientCpu.addColorStop(0, 'rgba(79, 70, 229, 0.4)'); // Primary
+        gradientCpu.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
 
-        const ctx = document.getElementById('metricsChart');
-        const maxDataPoints = 20;
+        const gradientRam = ctx.createLinearGradient(0, 0, 0, 400);
+        gradientRam.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); // Success
+        gradientRam.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
 
-        Chart.defaults.font.family = 'Inter';
-        Chart.defaults.color = theme.secondary;
+        Chart.defaults.font.family = "'Outfit', sans-serif";
+        Chart.defaults.color = '#94a3b8';
 
         const chart = new Chart(ctx, {
             type: 'line',
@@ -467,26 +614,32 @@ cat > /var/www/html/index.html << EOF
                 labels: [],
                 datasets: [
                     {
-                        label: 'CPU (%)',
+                        label: 'CPU Usage (%)',
                         data: [],
-                        borderColor: theme.primary,
-                        backgroundColor: 'rgba(137, 152, 109, 0.2)',
-                        borderWidth: 2,
+                        borderColor: '#4f46e5',
+                        backgroundColor: gradientCpu,
+                        borderWidth: 3,
                         tension: 0.4,
                         fill: true,
-                        pointRadius: 0,
-                        pointHitRadius: 10
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4f46e5',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     },
                     {
-                        label: 'RAM (%)',
+                        label: 'RAM Usage (%)',
                         data: [],
-                        borderColor: theme.accent,  // Changed to accent for contrast
-                        backgroundColor: 'rgba(197, 216, 157, 0.4)', // Lighter fill
-                        borderWidth: 2,
+                        borderColor: '#10b981',
+                        backgroundColor: gradientRam,
+                        borderWidth: 3,
                         tension: 0.4,
                         fill: true,
-                        pointRadius: 0,
-                        pointHitRadius: 10
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#10b981',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
                     }
                 ]
             },
@@ -496,55 +649,89 @@ cat > /var/www/html/index.html << EOF
                 plugins: {
                     legend: {
                         position: 'top',
-                        labels: {
-                            usePointStyle: true,
-                            boxWidth: 8,
-                            padding: 20
-                        }
+                        align: 'end',
+                        labels: { usePointStyle: true, boxWidth: 8, padding: 20, font: { weight: 500 } }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#0f172a',
+                        bodyColor: '#64748b',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 10,
+                        displayColors: true,
+                        cornerRadius: 8
                     }
                 },
                 scales: {
                     x: {
                         grid: { display: false },
-                        ticks: { display: false }
+                        ticks: { display: false } // Hide time labels for cleaner look
                     },
                     y: {
                         beginAtZero: true,
                         max: 100,
-                        grid: { color: theme.grid },
-                        border: { display: false },
-                        ticks: { maxTicksLimit: 5 }
+                        grid: { 
+                            color: '#f1f5f9',
+                            borderDash: [5, 5]
+                        },
+                        border: { display: false }
                     }
                 },
                 interaction: {
-                    mode: 'index',
-                    intersect: false,
+                    mode: 'nearest',
+                    axis: 'x',
+                    intersect: false
                 }
             }
         });
 
+        // Mock data logic remains mostly same, just hooking up IDs
+        const maxDataPoints = 20;
+
         async function updateMetrics() {
             try {
-                const response = await fetch('/metrics.php');
+                // Fetch live data from the PHP script
+                const response = await fetch('metrics.php');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: \${response.status}`);
+                }
+                
                 const data = await response.json();
                 
-                document.getElementById('cpu').textContent = data.cpu.toFixed(1);
-                document.getElementById('ram').textContent = data.ram_used.toFixed(0);
-                document.getElementById('disk').textContent = data.disk_io.toFixed(2);
-                document.getElementById('network').textContent = data.network.toFixed(1);
+                // Update DOM elements with live data
+                document.getElementById('cpu').textContent = data.cpu ? data.cpu.toFixed(1) : '0.0';
+                document.getElementById('ram').textContent = data.ram_used ? data.ram_used.toFixed(0) : '0';
+                document.getElementById('network').textContent = data.network ? data.network.toFixed(1) : '0.0';
+                document.getElementById('disk').textContent = data.disk_io ? data.disk_io.toFixed(2) : '0.00';
                 
+                // Update Chart
                 const now = new Date().toLocaleTimeString();
+                
                 if (chart.data.labels.length > maxDataPoints) {
                     chart.data.labels.shift();
                     chart.data.datasets.forEach(d => d.data.shift());
                 }
+
                 chart.data.labels.push(now);
-                chart.data.datasets[0].data.push(data.cpu);
-                chart.data.datasets[1].data.push(data.ram_percent);
+                // Use fallback of 0 if data isn't available
+                chart.data.datasets[0].data.push(data.cpu || 0);
+                chart.data.datasets[1].data.push(data.ram_percent || 0);
                 
-                chart.update('none');
+                chart.update('none'); 
             } catch (err) {
-                console.error(err);
+                console.error('Error fetching metrics:', err);
+                // Optional: You could uncomment the below to fallback to mock data for testing
+                /*
+                const mockData = {
+                    cpu: Math.random() * 60 + 10,
+                    ram_percent: Math.random() * 40 + 30
+                };
+                // Fallback chart update...
+                */
             }
         }
 
