@@ -69,8 +69,9 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
     server_name $DOMAIN *.$DOMAIN;
 
     ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
@@ -861,8 +862,9 @@ server {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    http2 on;
     server_name $DOMAIN *.$DOMAIN;
 
     ssl_certificate /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
@@ -941,7 +943,14 @@ EOF
 nginx -t
 
 if [ $? -eq 0 ]; then
-    systemctl reload nginx
+    # Resolve conflicts
+    echo "Resolving port conflicts..."
+    systemctl stop apache2 2>/dev/null
+    pkill -9 nginx 2>/dev/null
+    fuser -k 80/tcp 2>/dev/null
+    fuser -k 443/tcp 2>/dev/null
+
+    systemctl start nginx
     echo "Nginx configured successfully!"
 else
     echo "Nginx configuration error!"
