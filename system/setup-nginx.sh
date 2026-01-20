@@ -759,82 +759,71 @@ cat > /var/www/html/metrics.php << 'EOFPHP'
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
-// Get CPU usage
-function getCpuUsage() {
-    $stat1 = file('/proc/stat');
-    sleep(1);
-    $stat2 = file('/proc/stat');
-    
-    $info1 = explode(" ", preg_replace("!cpu +!", "", $stat1[0]));
-    $info2 = explode(" ", preg_replace("!cpu +!", "", $stat2[0]));
-    
-    $dif = array();
-    $dif['user'] = $info2[0] - $info1[0];
-    $dif['nice'] = $info2[1] - $info1[1];
-    $dif['sys'] = $info2[2] - $info1[2];
-    $dif['idle'] = $info2[3] - $info1[3];
-    $total = array_sum($dif);
-    $cpu = 100 - ($dif['idle'] * 100 / $total);
-    
-    return round($cpu, 2);
+function getDefaultInterface() {
+    $cmd = "ip route | grep default | awk '{print \$5}' | head -n1";
+    return trim(shell_exec($cmd));
 }
 
-// Get RAM usage
-function getRamUsage() {
-    $free = shell_exec('free -m');
-    $free = (string)trim($free);
-    $free_arr = explode("\n", $free);
-    $mem = explode(" ", $free_arr[1]);
-    $mem = array_filter($mem);
-    $mem = array_merge($mem);
-    
-    return array(
-        'total' => (float)$mem[1],
-        'used' => (float)$mem[2],
-        'free' => (float)$mem[3],
-        'percent' => round(($mem[2] / $mem[1]) * 100, 2)
-    );
+function getCpuStats() {
+    $data = file_get_contents('/proc/stat');
+    $info = explode(" ", preg_replace("!cpu +!", "", explode("\n", $data)[0]));
+    return $info;
 }
 
-// Get Disk I/O
-function getDiskIO() {
-    $output = shell_exec("iostat -d -m 1 2 | tail -n 2 | head -n 1 | awk '{print \$3+\$4}'");
-    return round((float)trim($output), 2);
+function getNetBytes($int) {
+    if(empty($int)) return ['rx'=>0, 'tx'=>0];
+    $rx = @file_get_contents("/sys/class/net/$int/statistics/rx_bytes");
+    $tx = @file_get_contents("/sys/class/net/$int/statistics/tx_bytes");
+    return ['rx'=>(float)$rx, 'tx'=>(float)$tx];
 }
 
-// Get Network bandwidth
-function getNetworkBandwidth() {
-    $interface = trim(shell_exec("ip route | grep default | awk '{print \$5}' | head -n1"));
-    if (empty($interface)) {
-        return 0;
-    }
-    
-    $rx1 = (float)file_get_contents("/sys/class/net/$interface/statistics/rx_bytes");
-    $tx1 = (float)file_get_contents("/sys/class/net/$interface/statistics/tx_bytes");
-    sleep(1);
-    $rx2 = (float)file_get_contents("/sys/class/net/$interface/statistics/rx_bytes");
-    $tx2 = (float)file_get_contents("/sys/class/net/$interface/statistics/tx_bytes");
-    
-    $rx = ($rx2 - $rx1) * 8 / 1000000; // Convert to Mbit/s
-    $tx = ($tx2 - $tx1) * 8 / 1000000;
-    
-    return round($rx + $tx, 2);
-}
+$net_int = getDefaultInterface();
 
-$ram = getRamUsage();
+// 1. Start Snapshot
+$cpu1 = getCpuStats();
+$net1 = getNetBytes($net_int);
 
-$metrics = array(
-    'cpu' => getCpuUsage(),
-    'ram_total' => $ram['total'],
-    'ram_used' => $ram['used'],
-    'ram_free' => $ram['free'],
-    'ram_percent' => $ram['percent'],
-    'disk_io' => getDiskIO(),
-    'network' => getNetworkBandwidth(),
+sleep(1); 
+
+// 2. End Snapshot
+$cpu2 = getCpuStats();
+$net2 = getNetBytes($net_int);
+
+// CPU Calc
+$dif = [];
+$dif['user'] = $cpu2[0] - $cpu1[0];
+$dif['nice'] = $cpu2[1] - $cpu1[1];
+$dif['sys']  = $cpu2[2] - $cpu1[2];
+$dif['idle'] = $cpu2[3] - $cpu1[3];
+$total = array_sum($dif);
+$cpu = $total > 0 ? (100 - ($dif['idle'] * 100 / $total)) : 0;
+
+// Net Calc (Mbps)
+$rx_diff = $net2['rx'] - $net1['rx'];
+$tx_diff = $net2['tx'] - $net1['tx'];
+$network_mbps = ($rx_diff + $tx_diff) * 8 / 1000000;
+
+// RAM
+$free = shell_exec('free -m');
+$free_rows = explode("\n", trim($free));
+$mem_row = preg_split('/\s+/', $free_rows[1]);
+$ram_total = (float)$mem_row[1];
+$ram_used = (float)$mem_row[2];
+$ram_percent = $ram_total > 0 ? round(($ram_used / $ram_total) * 100, 2) : 0;
+
+// Disk I/O (MB/s) - iostat adds ~1s execution time
+$disk_output = shell_exec("iostat -d -m 1 2 | tail -n 2 | head -n 1 | awk '{print \$3+\$4}'");
+$disk_io = round((float)trim($disk_output), 2);
+
+echo json_encode([
+    'cpu' => round($cpu, 1),
+    'ram_total' => $ram_total,
+    'ram_used' => $ram_used,
+    'ram_percent' => $ram_percent,
+    'disk_io' => $disk_io,
+    'network' => round($network_mbps, 2),
     'timestamp' => time()
-);
-
-echo json_encode($metrics);
+]);
 ?>
 EOFPHP
 
