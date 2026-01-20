@@ -142,6 +142,17 @@ EOF
 # Enable site
 ln -sf /etc/nginx/sites-available/vpn /etc/nginx/sites-enabled/
 
+# Fetch server location
+IP_DATA=$(curl -s http://ip-api.com/json/)
+CITY=$(echo "$IP_DATA" | grep -o '"city":"[^"]*"' | cut -d'"' -f4)
+COUNTRY=$(echo "$IP_DATA" | grep -o '"country":"[^"]*"' | cut -d'"' -f4)
+
+if [[ -n "$CITY" && -n "$COUNTRY" ]]; then
+    SERVER_LOC="$CITY / $COUNTRY"
+else
+    SERVER_LOC="Unknown Location"
+fi
+
 # Create landing page
 mkdir -p /var/www/html
 cat > /var/www/html/index.html << EOF
@@ -567,7 +578,7 @@ cat > /var/www/html/index.html << EOF
                     </div>
                     <div class="info-row">
                         <span class="info-label"><i class="ri-map-pin-line"></i> Location</span>
-                        <span class="info-value">Singapore / IDN</span>
+                        <span class="info-value">$SERVER_LOC</span>
                     </div>
                     <div class="info-row">
                         <span class="info-label"><i class="ri-shield-keyhole-line"></i> Protocol</span>
