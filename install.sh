@@ -179,6 +179,7 @@ FILES_SYSTEM=(
     "system/view-auto-ssl-analytics.sh" "system/fix-metrics-php.sh"
     "system/auto-setup-cloudflare-dns.sh" "system/fix-cloudflare-dns.sh" 
     "system/check-cloudflare-dns.sh" "system/fix-xray-config.sh"
+    "system/create-clash-converter.sh"
 )
 for file in "${FILES_SYSTEM[@]}"; do download_file "$file" "$INSTALL_DIR/$file"; done
 

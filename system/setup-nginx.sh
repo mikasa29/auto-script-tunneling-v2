@@ -594,6 +594,10 @@ cat > /var/www/html/index.html << EOF
                 <a href="https://t.me/MuzakieID" class="btn-action">
                     <i class="ri-telegram-fill"></i> OPEN BOT MENU
                 </a>
+                
+                <a href="/clash-converter.php" class="btn-action" style="margin-top: 10px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    <i class="ri-file-code-line"></i> CLASH YAML CONVERTER
+                </a>
             </div>
 
         </div>

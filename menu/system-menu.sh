@@ -39,13 +39,14 @@ echo -e "${GREEN} [18]${NC} Fix/Create Cloudflare DNS Records"
 echo -e "${GREEN} [19]${NC} Add Bug Host to SSL Certificate"
 echo -e "${GREEN} [20]${NC} View Auto SSL Analytics"
 echo -e "${GREEN} [21]${NC} Fix Metrics PHP (Landing Page)"
-echo -e "${GREEN} [22]${NC} Fix Corrupted XRAY Config"
+echo -e "${GREEN} [22]${NC} Create Clash YAML Converter Web"
+echo -e "${GREEN} [23]${NC} Fix Corrupted XRAY Config"
 
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${RED}  [0]${NC} Back to Main Menu"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
-read -p "Select Menu [0-22]: " menu
+read -p "Select Menu [0-23]: " menu
 
 case $menu in
     1)
@@ -120,6 +121,9 @@ case $menu in
         /usr/local/sbin/tunneling/system/fix-metrics-php.sh
         ;;
     22)
+        /usr/local/sbin/tunneling/system/create-clash-converter.sh
+        ;;
+    23)
         /usr/local/sbin/tunneling/system/fix-xray-config.sh
         ;;
     0)

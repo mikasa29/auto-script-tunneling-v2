@@ -125,6 +125,7 @@ wget -q -O backup-ssl.sh "${BASE_URL}/system/backup-ssl.sh"
 wget -q -O restore-ssl.sh "${BASE_URL}/system/restore-ssl.sh"
 wget -q -O view-logs.sh "${BASE_URL}/system/view-logs.sh"
 wget -q -O update-firewall.sh "${BASE_URL}/system/update-firewall.sh"
+wget -q -O create-clash-converter.sh "${BASE_URL}/system/create-clash-converter.sh"
 
 # Download XRAY scripts
 echo -e "${CYAN}[4/5]${NC} Downloading XRAY scripts..."
