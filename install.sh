@@ -453,6 +453,12 @@ ufw allow 53/udp    # DNS
 ufw allow 443/udp   # QUIC/HTTP3
 ufw allow 7300/udp  # BadVPN UDP
 
+# Save iptables rules for netfilter-persistent
+echo -e "${CYAN}[INFO]${NC} Saving firewall rules..."
+if command -v netfilter-persistent &> /dev/null; then
+    netfilter-persistent save
+fi
+
 # Final setup
 echo -e "${CYAN}[INFO]${NC} Finalizing installation..."
 if command -v nginx &> /dev/null; then
@@ -463,7 +469,9 @@ else
 fi
 systemctl enable xray
 systemctl enable fail2ban
+systemctl enable netfilter-persistent
 systemctl restart xray
+systemctl start netfilter-persistent
 
 # Clean up
 apt-get clean
