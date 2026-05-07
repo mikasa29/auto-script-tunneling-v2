@@ -23,7 +23,7 @@ Jika VPS Anda belum enable SSH root login dengan password, jalankan script ini t
 
 
 ```bash
-wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/system/enable-ssh-root.sh && chmod +x enable-ssh-root.sh && ./enable-ssh-root.sh
+wget https://github.com/mikasa29/auto-script-tunneling-v2/main/system/enable-ssh-root.sh && chmod +x enable-ssh-root.sh && ./enable-ssh-root.sh
 ```
 
 Script ini akan:
@@ -37,14 +37,14 @@ Script ini akan:
 ---
 Cara termudah, cukup jalankan perintah ini di terminal VPS Anda:
 ```bash
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl wget && wget -q https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/install.sh && chmod +x install.sh && ./install.sh
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl wget && wget -q https://github.com/mikasa29/auto-script-tunneling-v2/main/install.sh && chmod +x install.sh && ./install.sh
 ```
 
 Manual Installation (Git Clone)
 Jika Anda ingin melihat source code sebelum install:
 ```bash
 apt update && apt install git -y
-git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2
+git clone https://github.com/mikasa29/auto-script-tunneling-v2
 cd auto-script-tunneling-v2
 chmod +x setup.sh
 ./setup.sh
@@ -111,14 +111,14 @@ chmod +x setup.sh
 ### Quick Install (One-Liner)
 
 ```bash
-sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip wget && wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/install.sh && chmod +x install.sh && sed -i -e 's/\r$//' install.sh && screen -S setup ./install.sh
+sysctl -w net.ipv6.conf.all.disable_ipv6=1 && sysctl -w net.ipv6.conf.default.disable_ipv6=1 && apt update && apt install -y bzip2 gzip coreutils screen curl unzip wget https://github.com/mikasa29/auto-script-tunneling-v2/main/install.sh && chmod +x install.sh && sed -i -e 's/\r$//' install.sh && screen -S setup ./install.sh
 ```
 
 ### Quick Install (Step by Step)
 
 ```bash
 apt update && apt upgrade -y
-wget -O setup.sh https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && ./setup.sh
+wget -O setup.sh https://github.com/mikasa29/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && ./setup.sh
 ```
 
 ### Manual Installation
