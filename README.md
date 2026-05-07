@@ -124,7 +124,7 @@ wget -O setup.sh https://github.com/mikasa29/auto-script-tunneling-v2/main/setup
 ### Manual Installation
 
 ```bash
-git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git
+git clone https://github.com/mikasa29/auto-script-tunneling-v2.git
 cd auto-script-tunneling-v2
 chmod +x setup.sh
 ./setup.sh
@@ -202,10 +202,10 @@ Saat install, masukkan email Cloudflare dan API Token ini jika ingin mengaktifka
 
 ```bash
 # Cara 1: Menggunakan update.sh
-curl -sL https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/update.sh | bash
+curl -sL https://github.com/mikasa29/auto-script-tunneling-v2/main/update.sh | bash
 
 # Cara 2: Menggunakan git clone (Recommended)
-cd /tmp && rm -rf auto-script-tunneling && git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git && cd auto-script-tunneling && cp -f menu/*.sh ssh/*.sh system/*.sh xray/*.sh bot/*.sh /usr/local/sbin/tunneling/ && cp -f bot/telegram_bot.py /usr/local/sbin/tunneling/ && chmod +x /usr/local/sbin/tunneling/*.sh /usr/local/sbin/tunneling/telegram_bot.py && systemctl restart telegram-bot 2>/dev/null && cd ~ && rm -rf /tmp/auto-script-tunneling && echo "✓ Update completed!"
+cd /tmp && rm -rf auto-script-tunneling && git clone https://github.com/mikasa29/auto-script-tunneling-v2.git && cd auto-script-tunneling && cp -f menu/*.sh ssh/*.sh system/*.sh xray/*.sh bot/*.sh /usr/local/sbin/tunneling/ && cp -f bot/telegram_bot.py /usr/local/sbin/tunneling/ && chmod +x /usr/local/sbin/tunneling/*.sh /usr/local/sbin/tunneling/telegram_bot.py && systemctl restart telegram-bot 2>/dev/null && cd ~ && rm -rf /tmp/auto-script-tunneling && echo "✓ Update completed!"
 
 # Cara 3: Via Menu
 menu → System Menu → Update/Repair Scripts
@@ -507,7 +507,7 @@ ufw --force enable
 
 ```bash
 cd /root
-wget -O update.sh https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/update.sh
+wget -O update.sh https://github.com/mikasa29/auto-script-tunneling-v2/main/update.sh
 chmod +x update.sh
 ./update.sh
 ```
