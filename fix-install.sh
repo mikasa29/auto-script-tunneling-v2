@@ -15,7 +15,7 @@ echo -e "${GREEN}       Fix Installation - Download Missing Files     ${NC}"
 echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo ""
 
-BASE_URL="https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main"
+BASE_URL="https://github.com/mikasa29/auto-script-tunneling-v2/main"
 INSTALL_DIR="/usr/local/sbin/tunneling"
 BACKUP_DIR="/usr/local/sbin/tunneling/backup_$(date +%Y%m%d_%H%M%S)"
 
