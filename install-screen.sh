@@ -89,7 +89,7 @@ read -p "Press Enter to start installation in screen session... " dummy
 echo -e "${CYAN}[INFO]${NC} Downloading installer..."
 cd /tmp
 rm -f install.sh
-wget -q -O install.sh https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/install.sh
+wget -q -O install.sh https://github.com/mikasa29/auto-script-tunneling-v2/main/install.sh
 chmod +x install.sh
 
 # Create installation script that will run in screen
