@@ -16,7 +16,7 @@ CYAN='\033[0;36m'
 NC='\033[0m'
 
 # Base URL & Install Dir
-BASE_URL="https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main"
+BASE_URL="https://github.com/mikasa29/auto-script-tunneling-v2/main"
 INSTALL_DIR="/usr/local/sbin/tunneling"
 
 # Check if running as root
