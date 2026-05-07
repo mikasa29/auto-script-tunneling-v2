@@ -47,7 +47,7 @@ echo -e "${CYAN}[INFO]${NC} Downloading latest version..."
 
 # Download update
 cd /tmp
-BASE_URL="https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main"
+BASE_URL="https://github.com/mikasa29/auto-script-tunneling-v2/main"
 
 # Download menu scripts
 echo -e "${CYAN}[1/5]${NC} Downloading menu scripts..."
