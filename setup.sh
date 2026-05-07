@@ -139,7 +139,7 @@ echo -e "${CYAN}[INFO]${NC} Downloading components..."
 cd /usr/local/sbin/tunneling
 
 # Base URL for scripts
-BASE_URL="https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main"
+BASE_URL="https://github.com/mikasa29/auto-script-tunneling-v2/main"
 INSTALL_DIR="/usr/local/sbin/tunneling"
 
 # Create installation directory
