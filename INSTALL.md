@@ -35,14 +35,14 @@ su root
 apt update && apt upgrade -y
 
 # Install script
-wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && ./setup.sh
+wget https://github.com/mikasa29/auto-script-tunneling-v2/main/setup.sh && chmod +x setup.sh && ./setup.sh
 ```
 
 ### Method 2: Manual Install
 
 ```bash
 # Clone repository
-git clone https://github.com/Muzakie-ID/auto-script-tunneling-v2.git
+git clone https://github.com/mikasa29/auto-script-tunneling-v2.git
 cd auto-script-tunneling-v2
 
 # Jalankan installer
@@ -351,7 +351,7 @@ Jika ada masalah saat instalasi:
 
 ```bash
 cd /root
-wget https://raw.githubusercontent.com/Muzakie-ID/auto-script-tunneling-v2/main/update.sh
+wget https://github.com/mikasa29/auto-script-tunneling-v2/main/update.sh
 chmod +x update.sh
 ./update.sh
 ```
